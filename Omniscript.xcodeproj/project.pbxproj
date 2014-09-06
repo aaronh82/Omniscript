@@ -7,8 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		9D611B9F19B539250054BE48 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D611B9E19B539250054BE48 /* main.cpp */; };
 		9D611BA119B539250054BE48 /* Omniscript.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9D611BA019B539250054BE48 /* Omniscript.1 */; };
+		9D611BB519B539620054BE48 /* Block.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D611BA719B539620054BE48 /* Block.cpp */; };
+		9D611BB619B539620054BE48 /* DBConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D611BA919B539620054BE48 /* DBConnection.cpp */; };
+		9D611BB719B539620054BE48 /* Interpreter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D611BAB19B539620054BE48 /* Interpreter.cpp */; };
+		9D611BB819B539620054BE48 /* JSON.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D611BAD19B539620054BE48 /* JSON.cpp */; };
+		9D611BB919B539620054BE48 /* Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D611BAF19B539620054BE48 /* Logger.cpp */; };
+		9D611BBA19B539620054BE48 /* Triggers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D611BB119B539620054BE48 /* Triggers.cpp */; };
+		9D611BBB19B539620054BE48 /* Script.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D611BB319B539620054BE48 /* Script.cpp */; };
+		9D611BBD19B539880054BE48 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D611BBC19B539880054BE48 /* main.cpp */; };
+		9D611BC319B574670054BE48 /* Variables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D611BC119B574670054BE48 /* Variables.cpp */; };
+		9D611BC619B5761F0054BE48 /* Logic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D611BC419B5761F0054BE48 /* Logic.cpp */; };
+		9DE8A1E719B62D8700929C83 /* Operators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9DE8A1E519B62D8700929C83 /* Operators.cpp */; };
+		9DE8A1EA19B6321300929C83 /* HVAC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9DE8A1E819B6321300929C83 /* HVAC.cpp */; };
+		9DE8A1ED19B6327300929C83 /* Alarms.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9DE8A1EB19B6327300929C83 /* Alarms.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,8 +38,32 @@
 
 /* Begin PBXFileReference section */
 		9D611B9B19B539250054BE48 /* Omniscript */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Omniscript; sourceTree = BUILT_PRODUCTS_DIR; };
-		9D611B9E19B539250054BE48 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		9D611BA019B539250054BE48 /* Omniscript.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = Omniscript.1; sourceTree = "<group>"; };
+		9D611BA719B539620054BE48 /* Block.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Block.cpp; sourceTree = "<group>"; };
+		9D611BA819B539620054BE48 /* Block.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Block.h; sourceTree = "<group>"; };
+		9D611BA919B539620054BE48 /* DBConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DBConnection.cpp; sourceTree = "<group>"; };
+		9D611BAA19B539620054BE48 /* DBConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DBConnection.h; sourceTree = "<group>"; };
+		9D611BAB19B539620054BE48 /* Interpreter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Interpreter.cpp; sourceTree = "<group>"; };
+		9D611BAC19B539620054BE48 /* Interpreter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Interpreter.h; sourceTree = "<group>"; };
+		9D611BAD19B539620054BE48 /* JSON.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JSON.cpp; sourceTree = "<group>"; };
+		9D611BAE19B539620054BE48 /* JSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSON.h; sourceTree = "<group>"; };
+		9D611BAF19B539620054BE48 /* Logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Logger.cpp; sourceTree = "<group>"; };
+		9D611BB019B539620054BE48 /* Logger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Logger.h; sourceTree = "<group>"; };
+		9D611BB119B539620054BE48 /* Triggers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Triggers.cpp; sourceTree = "<group>"; };
+		9D611BB219B539620054BE48 /* Triggers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Triggers.h; sourceTree = "<group>"; };
+		9D611BB319B539620054BE48 /* Script.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Script.cpp; sourceTree = "<group>"; };
+		9D611BB419B539620054BE48 /* Script.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Script.h; sourceTree = "<group>"; };
+		9D611BBC19B539880054BE48 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		9D611BC119B574670054BE48 /* Variables.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Variables.cpp; sourceTree = "<group>"; };
+		9D611BC219B574670054BE48 /* Variables.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Variables.h; sourceTree = "<group>"; };
+		9D611BC419B5761F0054BE48 /* Logic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Logic.cpp; sourceTree = "<group>"; };
+		9D611BC519B5761F0054BE48 /* Logic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Logic.h; sourceTree = "<group>"; };
+		9DE8A1E519B62D8700929C83 /* Operators.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Operators.cpp; sourceTree = "<group>"; };
+		9DE8A1E619B62D8700929C83 /* Operators.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Operators.h; sourceTree = "<group>"; };
+		9DE8A1E819B6321300929C83 /* HVAC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HVAC.cpp; sourceTree = "<group>"; };
+		9DE8A1E919B6321300929C83 /* HVAC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HVAC.h; sourceTree = "<group>"; };
+		9DE8A1EB19B6327300929C83 /* Alarms.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Alarms.cpp; sourceTree = "<group>"; };
+		9DE8A1EC19B6327300929C83 /* Alarms.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Alarms.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,8 +96,32 @@
 		9D611B9D19B539250054BE48 /* Omniscript */ = {
 			isa = PBXGroup;
 			children = (
-				9D611B9E19B539250054BE48 /* main.cpp */,
+				9DE8A1EB19B6327300929C83 /* Alarms.cpp */,
+				9DE8A1EC19B6327300929C83 /* Alarms.h */,
+				9D611BA719B539620054BE48 /* Block.cpp */,
+				9D611BA819B539620054BE48 /* Block.h */,
+				9D611BA919B539620054BE48 /* DBConnection.cpp */,
+				9D611BAA19B539620054BE48 /* DBConnection.h */,
+				9DE8A1E819B6321300929C83 /* HVAC.cpp */,
+				9DE8A1E919B6321300929C83 /* HVAC.h */,
+				9D611BAB19B539620054BE48 /* Interpreter.cpp */,
+				9D611BAC19B539620054BE48 /* Interpreter.h */,
+				9D611BAD19B539620054BE48 /* JSON.cpp */,
+				9D611BAE19B539620054BE48 /* JSON.h */,
+				9D611BAF19B539620054BE48 /* Logger.cpp */,
+				9D611BB019B539620054BE48 /* Logger.h */,
+				9D611BC419B5761F0054BE48 /* Logic.cpp */,
+				9D611BC519B5761F0054BE48 /* Logic.h */,
+				9D611BBC19B539880054BE48 /* main.cpp */,
 				9D611BA019B539250054BE48 /* Omniscript.1 */,
+				9DE8A1E519B62D8700929C83 /* Operators.cpp */,
+				9DE8A1E619B62D8700929C83 /* Operators.h */,
+				9D611BB319B539620054BE48 /* Script.cpp */,
+				9D611BB419B539620054BE48 /* Script.h */,
+				9D611BB119B539620054BE48 /* Triggers.cpp */,
+				9D611BB219B539620054BE48 /* Triggers.h */,
+				9D611BC119B574670054BE48 /* Variables.cpp */,
+				9D611BC219B574670054BE48 /* Variables.h */,
 			);
 			path = Omniscript;
 			sourceTree = "<group>";
@@ -117,7 +177,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9D611B9F19B539250054BE48 /* main.cpp in Sources */,
+				9D611BC319B574670054BE48 /* Variables.cpp in Sources */,
+				9D611BB519B539620054BE48 /* Block.cpp in Sources */,
+				9D611BB919B539620054BE48 /* Logger.cpp in Sources */,
+				9DE8A1EA19B6321300929C83 /* HVAC.cpp in Sources */,
+				9D611BB619B539620054BE48 /* DBConnection.cpp in Sources */,
+				9DE8A1ED19B6327300929C83 /* Alarms.cpp in Sources */,
+				9D611BBA19B539620054BE48 /* Triggers.cpp in Sources */,
+				9D611BBB19B539620054BE48 /* Script.cpp in Sources */,
+				9D611BB719B539620054BE48 /* Interpreter.cpp in Sources */,
+				9DE8A1E719B62D8700929C83 /* Operators.cpp in Sources */,
+				9D611BBD19B539880054BE48 /* main.cpp in Sources */,
+				9D611BC619B5761F0054BE48 /* Logic.cpp in Sources */,
+				9D611BB819B539620054BE48 /* JSON.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -197,6 +269,12 @@
 		9D611BA519B539250054BE48 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"/usr/local/include/**",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -204,6 +282,12 @@
 		9D611BA619B539250054BE48 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"/usr/local/include/**",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -227,6 +311,7 @@
 				9D611BA619B539250054BE48 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

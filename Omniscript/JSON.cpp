@@ -80,7 +80,6 @@ namespace util {
 //	}
 	
 	void JSON::getOpArgs(Json::Value specs, block_ptr &curBlock) {
-		block_ptr b(new blocks::Block);
 		std::vector<std::string> args;
 		std::vector<block_ptr> blockArgs;
 		std::string opStr;
@@ -99,6 +98,7 @@ namespace util {
 			} else {
 				if ((*opArg).isArray()) {
 					opStr = "block:" + std::to_string(i++);
+					block_ptr b(new blocks::Block);
 					getOpArgs(*opArg, b);
 					blockArgs.push_back(b);
 				} else if ((*opArg).isInt()) {

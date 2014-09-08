@@ -91,11 +91,11 @@ namespace interp {
 			LOG(Log::ERROR, "No function for " + b->opcode() + " was found");
 			return;
 		}
-//		if (b->blockArgs().size() > 0) {
-//			for (auto arg : b->blockArgs()) {
-//				LOG(Log::DEBUGGING, b->opcode() + " block: " + arg->opcode());
-//			}
-//		}
+		if (b->blockArgs().size() > 0) {
+			for (auto arg : b->blockArgs()) {
+				LOG(Log::DEBUGGING, b->opcode() + " block: " + arg->opcode());
+			}
+		}
 		for (auto arg : b->args()) {
 			if (arg.find("block:") != std::string::npos) {
 				LOG(Log::DEBUGGING, "Block: " + (b->blockArgs()[stoi(arg.substr(arg.find(":") + 1))])->opcode());

@@ -63,21 +63,18 @@ namespace util {
 		}
 	}
 	
-//	void JSON::addNestedBlocks(Json::Value specs, block_ptr curBlock) {
-//		block_ptr newBlock(new blocks::Block);
-//		
-//		getOpArgs(specs, newBlock);
-//		
-//		if (curBlock == nullptr) {
-//			curBlock->addNestedArg(newBlock);
-//		} else {
-//			curBlock->next(newBlock);
-//			curBlock = curBlock->next();
-//		}
-//		for (auto block : curBlock->nestedArgs()) {
-//			LOG(Log::DEBUGGING, "Nested block: " + block->opcode());
-//		}
-//	}
+	void JSON::addNestedBlocks(Json::Value specs, block_ptr &curBlock) {
+		block_ptr newBlock(new blocks::Block);
+		
+		getOpArgs(specs, newBlock);
+		
+		if (curBlock == nullptr) {
+			curBlock = newBlock;
+		} else {
+			curBlock->next(newBlock);
+			curBlock = curBlock->next();
+		}
+	}
 	
 	void JSON::getOpArgs(Json::Value specs, block_ptr &curBlock) {
 		std::vector<std::string> args;
@@ -90,17 +87,20 @@ namespace util {
 			if (opArg == specs.begin()) {
 				if ((*opArg).isArray()) {
 					curBlock->setOpcode("nested");
-//					addNestedBlocks(*(*opArg).begin(), b);
-//					getOpArgs(*opArg, b);
+					block_ptr b;
+					addNestedBlocks(*opArg, b);
+					curBlock->setNestedStart(b);
 				} else {
 					curBlock->setOpcode((*opArg).asString());
 				}
 			} else {
 				if ((*opArg).isArray()) {
-					opStr = "block:" + std::to_string(i++);
 					block_ptr b(new blocks::Block);
 					getOpArgs(*opArg, b);
-					blockArgs.push_back(b);
+					if (b->opcode() != "nested") {
+						opStr = "block:" + std::to_string(i++);
+						blockArgs.push_back(b);
+					}
 				} else if ((*opArg).isInt()) {
 					opStr = std::to_string((*opArg).asInt());
 				} else {
@@ -111,11 +111,9 @@ namespace util {
 					args.push_back(opStr);
 				} else {
 					std::cout << "Error getting arg string.\nExiting..." << std::endl;
-					exit(2);
+					throw "Error getting arg string.";
 				}
 			}
-//			LOG(Log::DEBUGGING, "opStr: " + opStr);
-//			LOG(Log::DEBUGGING, "curBlock->opcode(): " + curBlock->opcode());
 		}
 		if (args.size() > 0) curBlock->setArgs(args);
 		if (blockArgs.size() > 0) curBlock->setBlockArgs(blockArgs);

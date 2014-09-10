@@ -10,7 +10,9 @@
 
 namespace blocks {
 
-	Block::Block(std::string opcode, block_ptr next): opcode_(opcode), next_(next) {}
+	Block::Block(std::string opcode, block_ptr next): opcode_(opcode), next_(next) {
+		nestedStart_ = nullptr;
+	}
 	
 	void Block::setOpcode(std::string op) {
 		opcode_ = op;
@@ -36,13 +38,13 @@ namespace blocks {
 		return blockArgs_;
 	}
 	
-//	void Block::addNestedArg(Block::block_ptr b) {
-//		nestedArgs_.push_back(b);
-//	}
-//	
-//	std::vector<Block::block_ptr> Block::nestedArgs() {
-//		return nestedArgs_;
-//	}
+	void Block::setNestedStart(block_ptr b) {
+		nestedStart_ = b;
+	}
+	
+	Block::block_ptr Block::nestedStart() {
+		return nestedStart_;
+	}
 	
 	Block::block_ptr Block::next(Block::block_ptr n) {
 		if (n) {

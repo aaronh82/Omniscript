@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9D4580FC19BF83250069B7C2 /* BaseFunctor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D4580FA19BF83250069B7C2 /* BaseFunctor.cpp */; };
 		9D611BA119B539250054BE48 /* Omniscript.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9D611BA019B539250054BE48 /* Omniscript.1 */; };
 		9D611BB519B539620054BE48 /* Block.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D611BA719B539620054BE48 /* Block.cpp */; };
 		9D611BB619B539620054BE48 /* DBConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D611BA919B539620054BE48 /* DBConnection.cpp */; };
@@ -37,6 +38,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9D4580FA19BF83250069B7C2 /* BaseFunctor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BaseFunctor.cpp; sourceTree = "<group>"; };
+		9D4580FB19BF83250069B7C2 /* BaseFunctor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseFunctor.h; sourceTree = "<group>"; };
 		9D611B9B19B539250054BE48 /* Omniscript */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Omniscript; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D611BA019B539250054BE48 /* Omniscript.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = Omniscript.1; sourceTree = "<group>"; };
 		9D611BA719B539620054BE48 /* Block.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Block.cpp; sourceTree = "<group>"; };
@@ -104,6 +107,8 @@
 				9D611BAA19B539620054BE48 /* DBConnection.h */,
 				9DE8A1E819B6321300929C83 /* HVAC.cpp */,
 				9DE8A1E919B6321300929C83 /* HVAC.h */,
+				9D4580FA19BF83250069B7C2 /* BaseFunctor.cpp */,
+				9D4580FB19BF83250069B7C2 /* BaseFunctor.h */,
 				9D611BAB19B539620054BE48 /* Interpreter.cpp */,
 				9D611BAC19B539620054BE48 /* Interpreter.h */,
 				9D611BAD19B539620054BE48 /* JSON.cpp */,
@@ -187,6 +192,7 @@
 				9D611BBB19B539620054BE48 /* Script.cpp in Sources */,
 				9D611BB719B539620054BE48 /* Interpreter.cpp in Sources */,
 				9DE8A1E719B62D8700929C83 /* Operators.cpp in Sources */,
+				9D4580FC19BF83250069B7C2 /* BaseFunctor.cpp in Sources */,
 				9D611BBD19B539880054BE48 /* main.cpp in Sources */,
 				9D611BC619B5761F0054BE48 /* Logic.cpp in Sources */,
 				9D611BB819B539620054BE48 /* JSON.cpp in Sources */,

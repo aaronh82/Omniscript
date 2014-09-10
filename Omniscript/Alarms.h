@@ -10,15 +10,24 @@
 #define __Omniscript__Alarms__
 
 #include "Logger.h"
+#include "Block.h"
+#include "BaseFunctor.h"
+
+using block_ptr = blocks::Block::block_ptr;
 
 namespace interp {
-	static void highTempLimit() {
-		LOG(Log::DEBUGGING, "highTempLimit");
-	}
 	
-	static void lowTempLimit() {
-		LOG(Log::DEBUGGING, "lowTempLimit");
-	}
+	class highTempLimit: public VoidFunctor {
+	public:
+		highTempLimit(){}
+		void operator()(const block_ptr&);
+	};
+	
+	class lowTempLimit: public VoidFunctor {
+	public:
+		lowTempLimit(){}
+		void operator()(const block_ptr&);
+	};
 }
 
 #endif /* defined(__Omniscript__Alarms__) */

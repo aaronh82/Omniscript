@@ -10,39 +10,59 @@
 #define __Omniscript__Logic__
 
 #include "Logger.h"
+#include "Block.h"
+#include "BaseFunctor.h"
+
+using block_ptr = blocks::Block::block_ptr;
 
 namespace interp {
-	static void waitFor() {
-		LOG(Log::DEBUGGING, "waitFor");
-	}
+	class waitFor: public VoidFunctor {
+	public:
+		waitFor(){};
+		void operator()(const block_ptr&);
+	};
 	
-	static void doRepeat() {
-		LOG(Log::DEBUGGING, "doRepeat");
-	}
+	class doRepeat: public VoidFunctor {
+	public:
+		doRepeat(){};
+		void operator()(const block_ptr&);
+	};
 	
-	static void doForever() {
-		LOG(Log::DEBUGGING, "doForever");
-	}
+	class doForever: public VoidFunctor {
+	public:
+		doForever(){};
+		void operator()(const block_ptr&);
+	};
 	
-	static void doIf() {
-		LOG(Log::DEBUGGING, "doIf");
-	}
+	class doIf: public VoidFunctor {
+	public:
+		doIf(){};
+		void operator()(const block_ptr&);
+	};
 	
-	static void doIfElse() {
-		LOG(Log::DEBUGGING, "doIfElse");
-	}
+	class doIfElse: public VoidFunctor {
+	public:
+		doIfElse(){};
+		void operator()(const block_ptr&);
+	};
 	
-	static void doWaitUntil() {
-		LOG(Log::DEBUGGING, "doWaitUntil");
-	}
+	class doWaitUntil: public VoidFunctor {
+	public:
+		doWaitUntil(){};
+		void operator()(const block_ptr&);
+	};
 	
-	static void doUntil() {
-		LOG(Log::DEBUGGING, "doUntil");
-	}
+	class doUntil: public VoidFunctor {
+	public:
+		doUntil(){};
+		void operator()(const block_ptr&);
+	};
 	
-	static void stopScripts() {
-		LOG(Log::DEBUGGING, "stopScripts");
-	}
+	class stopScripts: public VoidFunctor {
+	public:
+		stopScripts(){};
+		void operator()(const block_ptr&);
+	};
 }
 
 #endif /* defined(__Omniscript__Logic__) */

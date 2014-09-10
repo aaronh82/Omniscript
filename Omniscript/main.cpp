@@ -110,7 +110,6 @@ int main(int argc, const char * argv[])
 													res->getBlob("data"),
 													res->getBoolean("enabled")));
 			} else {
-//				LOG(Log::DEBUGGING, res->getBoolean("enabled") ? "True" : "False");
 				res->getBoolean("enabled") ? (*it)->enable() : (*it)->disable();
 			}
 		}

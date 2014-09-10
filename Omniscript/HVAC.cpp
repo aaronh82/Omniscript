@@ -7,3 +7,15 @@
 //
 
 #include "HVAC.h"
+
+namespace interp {
+	bool coolSetpoint::operator()(const block_ptr &b) {
+		LOG(Log::DEBUGGING, "coolSetpoint");
+		return true;
+	}
+	
+	bool heatSetpoint::operator()(const block_ptr &b) {
+		LOG(Log::DEBUGGING, "heatSetpoint");
+		return true;
+	}
+}

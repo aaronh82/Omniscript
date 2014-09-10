@@ -10,15 +10,26 @@
 #define __Omniscript__HVAC__
 
 #include "Logger.h"
+#include "Block.h"
+#include "BaseFunctor.h"
+
+using block_ptr = blocks::Block::block_ptr;
 
 namespace interp {
-	static void coolSetpoint() {
-		LOG(Log::DEBUGGING, "coolSetpoint");
-	}
 	
-	static void heatSetpoint() {
-		LOG(Log::DEBUGGING, "heatSetpoint");
-	}
+	class coolSetpoint: public BoolFunctor {
+		int sp_, db_, in_;
+	public:
+		coolSetpoint(){}
+		bool operator()(const block_ptr&);
+	};
+	
+	class heatSetpoint: public BoolFunctor {
+		int sp_, db_, in_;
+	public:
+		heatSetpoint(){}
+		bool operator()(const block_ptr&);
+	};
 }
 
 #endif /* defined(__Omniscript__HVAC__) */

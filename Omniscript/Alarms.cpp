@@ -7,3 +7,13 @@
 //
 
 #include "Alarms.h"
+
+namespace interp {
+	void highTempLimit::operator()(const block_ptr &b) {
+		LOG(Log::DEBUGGING, "highTempLimit");
+	}
+	
+	void lowTempLimit::operator()(const block_ptr &b) {
+		LOG(Log::DEBUGGING, "lowTempLimit");
+	}
+}

@@ -21,54 +21,60 @@ namespace interp {
 		initPrims();
 	}
 	
+//	Interpreter::~Interpreter() {
+//		for (auto f : primTable) {
+//			delete f.second;
+//		}
+//	}
+	
 	void Interpreter::initPrims() {
 		// Triggers
-		primTable["whenOn"]					= &whenOn;
-		primTable["whenSchedule"]			= &whenSchedule;
-		primTable["whenBool"]				= &whenBool;
-		primTable["whenIReceive"]			= &whenIReceive;
-		primTable["broadcast:"]				= &broadcast;
-		primTable["doBroadcastAndWait"]		= &doBroadcastAndWait;
+		primTable["whenOn"]					= new whenOn;
+		primTable["whenSchedule"]			= new whenSchedule;
+		primTable["whenBool"]				= new whenBool;
+		primTable["whenIReceive"]			= new whenIReceive;
+		primTable["broadcast:"]				= new broadcast;
+		primTable["doBroadcastAndWait"]		= new doBroadcastAndWait;
 		
 		// Logic
-		primTable["wait:elapsed:from:"]		= &waitFor;
-		primTable["doRepeat"]				= &doRepeat;
-		primTable["doForever"]				= &doForever;
-		primTable["doIf"]					= &doIf;
-		primTable["doIfElse"]				= &doIfElse;
-		primTable["doWaitUntil"]			= &doWaitUntil;
-		primTable["doUntil"]				= &doUntil;
-		primTable["stopScripts"]			= &stopScripts;
-		
+		primTable["wait:elapsed:from:"]		= new waitFor;
+		primTable["doRepeat"]				= new doRepeat;
+		primTable["doForever"]				= new doForever;
+		primTable["doIf"]					= new doIf;
+		primTable["doIfElse"]				= new doIfElse;
+		primTable["doWaitUntil"]			= new doWaitUntil;
+		primTable["doUntil"]				= new doUntil;
+		primTable["stopScripts"]			= new stopScripts;
+
 		// Operators
-		primTable["+"]						= &add;
-		primTable["-"]						= &subtract;
-		primTable["*"]						= &multiply;
-		primTable["/"]						= &divide;
-		primTable["randomFrom:to:"]			= &randomFromTo;
-		primTable["<"]						= &lessThan;
-		primTable["="]						= &equalTo;
-		primTable[">"]						= &greaterThan;
-		primTable["&"]						= &logicalAnd;
-		primTable["|"]						= &logicalOr;
-		primTable["not"]					= &logicalNegation;
-		primTable["%"]						= &modulo;
-		primTable["rounded"]				= &round;
-		primTable["computeFunction:of:"]	= &computeFunction;
+		primTable["+"]						= new add;
+		primTable["-"]						= new subtract;
+		primTable["*"]						= new multiply;
+		primTable["/"]						= new divide;
+		primTable["randomFrom:to:"]			= new randomFromTo;
+		primTable["<"]						= new lessThan;
+		primTable["="]						= new equalTo;
+		primTable[">"]						= new greaterThan;
+		primTable["&"]						= new logicalAnd;
+		primTable["|"]						= new logicalOr;
+		primTable["not"]					= new logicalNegation;
+		primTable["%"]						= new modulo;
+		primTable["rounded"]				= new round;
+		primTable["computeFunction:of:"]	= new computeFunction;
 		
 		// HVAC
-		primTable["csetpt:db:in"]			= &coolSetpoint;
-		primTable["hsetpt:db:in"]			= &heatSetpoint;
+		primTable["csetpt:db:in:"]			= new coolSetpoint;
+		primTable["hsetpt:db:in:"]			= new heatSetpoint;
 
 		// Variables
-		primTable["setVar:to:"]				= &setVar;
-		primTable["changeVar:by:"]			= &changeVar;
-		primTable["setPoint:to:"]			= &setPoint;
-		primTable["changePoint:by:"]		= &changePoint;
+		primTable["setVar:to:"]				= new setVar;
+		primTable["changeVar:by:"]			= new changeVar;
+		primTable["setPoint:to:"]			= new setPoint;
+		primTable["changePoint:by:"]		= new changePoint;
 		
 		// Alarms
-		primTable["highTemp:limit:in:"]		= &highTempLimit;
-		primTable["lowTemp:limit:in:"]		= &lowTempLimit;
+		primTable["highTemp:limit:in:"]		= new highTempLimit;
+		primTable["lowTemp:limit:in:"]		= new lowTempLimit;
 	}
 	
 	void Interpreter::start() {
@@ -85,34 +91,34 @@ namespace interp {
 		}
 	}
 	
-	void Interpreter::execute(block_ptr b) {
+	void Interpreter::execute(const block_ptr &b) {
 		func_map::const_iterator op = primTable.find(b->opcode());
 		if (op == primTable.end()) {
 			LOG(Log::ERROR, "No function for " + b->opcode() + " was found");
 			return;
 		}
-		if (b->blockArgs().size() > 0) {
-			for (auto arg : b->blockArgs()) {
-				LOG(Log::DEBUGGING, b->opcode() + " block: " + arg->opcode());
-			}
-		}
-		for (auto arg : b->args()) {
-			if (arg.find("block:") != std::string::npos) {
-				LOG(Log::DEBUGGING, "Block: " + (b->blockArgs()[stoi(arg.substr(arg.find(":") + 1))])->opcode());
-				execute(b->blockArgs()[stoi(arg.substr(arg.find(":") + 1))]);
-			} else if (arg.find("nested") != std::string::npos) {
-				continue;
-			}
-		}
-		callFunc(op);
+//		for (auto arg : b->args()) {
+//			if (arg.find("block:") != std::string::npos) {
+//				LOG(Log::DEBUGGING, b->opcode() + " blockArgs size: " + std::to_string(b->blockArgs().size()));
+//				execute(b->blockArgs()[stoi(arg.substr(arg.find(":") + 1))]);
+//			}
+//		}
+		callFunc(op, b);
 		if (b->next()) {
 			execute(b->next());
 		}
 		return;
 	}
 	
-	void Interpreter::callFunc(const func_map::const_iterator& func, ...) {
-		(*(func->second))();
+	void Interpreter::callFunc(const func_map::const_iterator& func, const block_ptr &b, ...) {
+		if (VoidFunctor *p = dynamic_cast<VoidFunctor*>(func->second)) {
+			(*p)(b);
+		} else if (BoolFunctor *p = dynamic_cast<BoolFunctor*>(func->second)) {
+			(*p)(b);
+		} else if (FloatFunctor *p = dynamic_cast<FloatFunctor*>(func->second)) {
+			(*p)(b);
+		}
+//		(*(func->second))(b);
 	}
 	
 	

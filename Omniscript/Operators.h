@@ -10,63 +10,95 @@
 #define __Omniscript__Operators__
 
 #include "Logger.h"
+#include "Block.h"
+#include "BaseFunctor.h"
+
+using block_ptr = blocks::Block::block_ptr;
 
 namespace interp {
-	static void add() {
-		LOG(Log::DEBUGGING, "add");
-	}
+	class add: public FloatFunctor {
+	public:
+		add(){}
+		float operator()(const block_ptr&);
+	};
 	
-	static void subtract() {
-		LOG(Log::DEBUGGING, "subtract");
-	}
+	class subtract: public FloatFunctor {
+	public:
+		subtract(){}
+		float operator()(const block_ptr&);
+	};
 	
-	static void multiply() {
-		LOG(Log::DEBUGGING, "multiply");
-	}
+	class multiply: public FloatFunctor {
+	public:
+		multiply(){}
+		float operator()(const block_ptr&);
+	};
 	
-	static void divide() {
-		LOG(Log::DEBUGGING, "divide");
-	}
+	class divide: public FloatFunctor {
+	public:
+		divide(){}
+		float operator()(const block_ptr&);
+	};
 	
-	static void randomFromTo() {
-		LOG(Log::DEBUGGING, "randomFromTo");
-	}
+	class randomFromTo: public FloatFunctor {
+	public:
+		randomFromTo(){}
+		float operator()(const block_ptr&);
+	};
 	
-	static void	lessThan() {
-		LOG(Log::DEBUGGING, "lessThan");
-	}
+	class lessThan: public FloatFunctor {
+	public:
+		lessThan(){}
+		float operator()(const block_ptr&);
+	};
 	
-	static void equalTo() {
-		LOG(Log::DEBUGGING, "equalTo");
-	}
+	class equalTo: public FloatFunctor {
+	public:
+		equalTo(){}
+		float operator()(const block_ptr&);
+	};
 	
-	static void greaterThan() {
-		LOG(Log::DEBUGGING, "greaterThan");
-	}
+	class greaterThan: public FloatFunctor {
+	public:
+		greaterThan(){}
+		float operator()(const block_ptr&);
+	};
 	
-	static void logicalAnd() {
-		LOG(Log::DEBUGGING, "logicalAnd");
-	}
+	class logicalAnd: public FloatFunctor {
+	public:
+		logicalAnd(){}
+		float operator()(const block_ptr&);
+	};
 	
-	static void logicalOr() {
-		LOG(Log::DEBUGGING, "logicalOr");
-	}
+	class logicalOr: public FloatFunctor {
+	public:
+		logicalOr(){}
+		float operator()(const block_ptr&);
+	};
 	
-	static void logicalNegation() {
-		LOG(Log::DEBUGGING, "logicalNegation");
-	}
+	class logicalNegation: public FloatFunctor {
+	public:
+		logicalNegation(){}
+		float operator()(const block_ptr&);
+	};
 	
-	static void modulo() {
-		LOG(Log::DEBUGGING, "modulo");
-	}
+	class modulo: public FloatFunctor {
+	public:
+		modulo(){}
+		float operator()(const block_ptr&);
+	};
 	
-	static void round() {
-		LOG(Log::DEBUGGING, "round");
-	}
+	class round: public FloatFunctor {
+	public:
+		round(){}
+		float operator()(const block_ptr&);
+	};
 	
-	static void computeFunction() {
-		LOG(Log::DEBUGGING, "computeFunction");
-	}
+	class computeFunction: public FloatFunctor {
+	public:
+		computeFunction(){}
+		float operator()(const block_ptr&);
+	};
 }
 
 #endif /* defined(__Omniscript__Operators__) */

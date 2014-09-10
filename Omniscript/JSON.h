@@ -30,7 +30,7 @@ namespace util {
 		static bool parse(std::istream*);
 		static void getInnerBlocks(Json::Value);
 		static void addBlock(Json::Value, block_ptr&);
-//		static void addNestedBlocks(Json::Value, block_ptr&);
+		static void addNestedBlocks(Json::Value, block_ptr&);
 		static void getOpArgs(Json::Value, block_ptr&);
 		
 	public:

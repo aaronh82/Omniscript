@@ -10,24 +10,35 @@
 #define __Omniscript__Variables__
 
 #include "Logger.h"
-#include <unistd.h>
+#include "Block.h"
+#include "BaseFunctor.h"
+
+using block_ptr = blocks::Block::block_ptr;
 
 namespace interp {
-	static void setVar() {
-		LOG(Log::DEBUGGING, "setVar");
-	}
+	class setVar: public VoidFunctor {
+	public:
+		setVar(){}
+		void operator()(const block_ptr&);
+	};
 	
-	static void changeVar() {
-		LOG(Log::DEBUGGING, "changeVar");
-	}
+	class changeVar: public VoidFunctor {
+	public:
+		changeVar(){}
+		void operator()(const block_ptr&);
+	};
 	
-	static void setPoint() {
-		LOG(Log::DEBUGGING, "setPoint");
-	}
+	class setPoint: public VoidFunctor {
+	public:
+		setPoint(){}
+		void operator()(const block_ptr&);
+	};
 	
-	static void changePoint() {
-		LOG(Log::DEBUGGING, "changePoint");
-	}
+	class changePoint: public VoidFunctor {
+	public:
+		changePoint(){}
+		void operator()(const block_ptr&);
+	};
 }
 
 #endif /* defined(__Omniscript__Variables__) */

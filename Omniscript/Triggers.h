@@ -10,31 +10,47 @@
 #define __OmniScript__Primitives__
 
 #include "Logger.h"
+#include "Block.h"
+#include "BaseFunctor.h"
+
+using block_ptr = blocks::Block::block_ptr;
 
 namespace interp {
-	static void whenOn() {
-		LOG(Log::DEBUGGING, "whenOn");
-	}
+	class whenOn: public VoidFunctor {
+	public:
+		whenOn(){}
+		void operator()(const block_ptr&);
+	};
 	
-	static void whenSchedule() {
-		LOG(Log::DEBUGGING, "whenSchedule");
-	}
+	class whenSchedule: public VoidFunctor {
+	public:
+		whenSchedule(){}
+		void operator()(const block_ptr&);
+	};
 	
-	static void whenBool() {
-		LOG(Log::DEBUGGING, "whenBool");
-	}
+	class whenBool: public VoidFunctor {
+	public:
+		whenBool(){}
+		void operator()(const block_ptr&);
+	};
 	
-	static void whenIReceive() {
-		LOG(Log::DEBUGGING, "whenIReceive");
-	}
+	class whenIReceive: public VoidFunctor {
+	public:
+		whenIReceive(){}
+		void operator()(const block_ptr&);
+	};
 	
-	static void broadcast() {
-		LOG(Log::DEBUGGING, "broadcast");
-	}
+	class broadcast: public VoidFunctor {
+	public:
+		broadcast(){}
+		void operator()(const block_ptr&);
+	};
 	
-	static void doBroadcastAndWait() {
-		LOG(Log::DEBUGGING, "doBroadcastAndWait");
-	}
+	class doBroadcastAndWait: public VoidFunctor {
+	public:
+		doBroadcastAndWait(){}
+		void operator()(const block_ptr&);
+	};
 }
 
 #endif /* defined(__OmniScript__Primitives__) */

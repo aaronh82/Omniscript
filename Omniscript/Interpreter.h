@@ -18,24 +18,24 @@
 #include <cstdarg>
 
 #include "Block.h"
+#include "BaseFunctor.h"
 
 using block_ptr = blocks::Block::block_ptr;
 
 namespace interp {
 
 	class Interpreter {
-		typedef void (*func)();
-		typedef std::map<std::string, func> func_map;
+		typedef std::map<std::string, BaseFunctor*> func_map;
 		func_map primTable;
 		std::vector<block_ptr> scripts_;
 				
 		void initPrims();
-		void execute(block_ptr);
-		void callFunc(const func_map::const_iterator&, ...);
+		void execute(const block_ptr&);
+		void callFunc(const func_map::const_iterator&, const block_ptr&, ...);
 		
 	public:
 		Interpreter(const std::vector<block_ptr>);
-		~Interpreter() {};
+//		~Interpreter();
 		
 		void start();
 	};

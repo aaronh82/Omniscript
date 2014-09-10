@@ -21,7 +21,7 @@ namespace blocks {
 		std::string opcode_;
 		std::vector<std::string> args_;
 		std::vector<block_ptr_> blockArgs_;
-//		std::vector<block_ptr_> nestedArgs_;
+		block_ptr_ nestedStart_;
 		block_ptr_ next_;
 		
 	public:
@@ -36,8 +36,8 @@ namespace blocks {
 		std::vector<std::string> args();
 		void setBlockArgs(std::vector<block_ptr>);
 		std::vector<block_ptr> blockArgs();
-//		void addNestedArg(block_ptr);
-//		std::vector<block_ptr> nestedArgs();
+		void setNestedStart(block_ptr);
+		block_ptr nestedStart();
 		block_ptr next(block_ptr = nullptr);
 		
 	};

@@ -19,85 +19,109 @@ namespace interp {
 	class add: public FloatFunctor {
 	public:
 		add(){}
-		float operator()(const block_ptr&);
+		float operator()(const block_ptr&, Interpreter&);
 	};
 	
 	class subtract: public FloatFunctor {
 	public:
 		subtract(){}
-		float operator()(const block_ptr&);
+		float operator()(const block_ptr&, Interpreter&);
 	};
 	
 	class multiply: public FloatFunctor {
 	public:
 		multiply(){}
-		float operator()(const block_ptr&);
+		float operator()(const block_ptr&, Interpreter&);
 	};
 	
 	class divide: public FloatFunctor {
 	public:
 		divide(){}
-		float operator()(const block_ptr&);
+		float operator()(const block_ptr&, Interpreter&);
 	};
 	
-	class randomFromTo: public FloatFunctor {
+	class randomFromTo: public IntFunctor {
 	public:
 		randomFromTo(){}
-		float operator()(const block_ptr&);
+		int operator()(const block_ptr&, Interpreter&);
 	};
 	
-	class lessThan: public FloatFunctor {
+	class lessThan: public BoolFunctor {
 	public:
 		lessThan(){}
-		float operator()(const block_ptr&);
+		bool operator()(const block_ptr&, Interpreter&);
 	};
 	
-	class equalTo: public FloatFunctor {
+	class equalTo: public BoolFunctor {
 	public:
 		equalTo(){}
-		float operator()(const block_ptr&);
+		bool operator()(const block_ptr&, Interpreter&);
 	};
 	
-	class greaterThan: public FloatFunctor {
+	class greaterThan: public BoolFunctor {
 	public:
 		greaterThan(){}
-		float operator()(const block_ptr&);
+		bool operator()(const block_ptr&, Interpreter&);
 	};
 	
-	class logicalAnd: public FloatFunctor {
+	class logicalAnd: public BoolFunctor {
 	public:
 		logicalAnd(){}
-		float operator()(const block_ptr&);
+		bool operator()(const block_ptr&, Interpreter&);
 	};
 	
-	class logicalOr: public FloatFunctor {
+	class logicalOr: public BoolFunctor {
 	public:
 		logicalOr(){}
-		float operator()(const block_ptr&);
+		bool operator()(const block_ptr&, Interpreter&);
 	};
 	
-	class logicalNegation: public FloatFunctor {
+	class logicalNegation: public BoolFunctor {
 	public:
 		logicalNegation(){}
-		float operator()(const block_ptr&);
+		bool operator()(const block_ptr&, Interpreter&);
 	};
 	
-	class modulo: public FloatFunctor {
+	class modulo: public IntFunctor {
 	public:
 		modulo(){}
-		float operator()(const block_ptr&);
+		int operator()(const block_ptr&, Interpreter&);
 	};
 	
-	class round: public FloatFunctor {
+	class roundToNearest: public FloatFunctor {
 	public:
-		round(){}
-		float operator()(const block_ptr&);
+		roundToNearest(){}
+		float operator()(const block_ptr&, Interpreter&);
 	};
 	
 	class computeFunction: public FloatFunctor {
 	public:
 		computeFunction(){}
-		float operator()(const block_ptr&);
+		float operator()(const block_ptr&, Interpreter&);
+	};
+	
+	class maxOf: public VoidFunctor {
+	public:
+		maxOf(){}
+		void operator()(const block_ptr&, Interpreter&);
+	};
+	
+	class minOf: public VoidFunctor {
+	public:
+		minOf(){}
+		void operator()(const block_ptr&, Interpreter&);
+	};
+	
+	class avg: public VoidFunctor {
+	public:
+		avg(){}
+		void operator()(const block_ptr&, Interpreter&);
+	};
+	
+	class getValueOf: public FloatFunctor {
+	public:
+		getValueOf(){}
+		float operator()(const block_ptr&, Interpreter&);
 	};
 }
 

@@ -43,7 +43,7 @@ namespace conn {
 		try {
 			stmt_->execute(query);
 		} catch (sql::SQLException e) {
-			LOG(Log::WARN, "Failed to execute query: " + query);
+			LOG(Log::WARN, "Failed to execute query: " + query + ": " + e.what());
 		}
 //		std::string fields_str(concat(fields));
 //		std::string values_str(concat(values, '\''));

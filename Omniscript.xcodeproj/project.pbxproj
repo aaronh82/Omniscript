@@ -99,36 +99,60 @@
 		9D611B9D19B539250054BE48 /* Omniscript */ = {
 			isa = PBXGroup;
 			children = (
-				9DE8A1EB19B6327300929C83 /* Alarms.cpp */,
-				9DE8A1EC19B6327300929C83 /* Alarms.h */,
-				9D611BA719B539620054BE48 /* Block.cpp */,
-				9D611BA819B539620054BE48 /* Block.h */,
-				9D611BA919B539620054BE48 /* DBConnection.cpp */,
-				9D611BAA19B539620054BE48 /* DBConnection.h */,
-				9DE8A1E819B6321300929C83 /* HVAC.cpp */,
-				9DE8A1E919B6321300929C83 /* HVAC.h */,
-				9D4580FA19BF83250069B7C2 /* BaseFunctor.cpp */,
-				9D4580FB19BF83250069B7C2 /* BaseFunctor.h */,
-				9D611BAB19B539620054BE48 /* Interpreter.cpp */,
-				9D611BAC19B539620054BE48 /* Interpreter.h */,
-				9D611BAD19B539620054BE48 /* JSON.cpp */,
-				9D611BAE19B539620054BE48 /* JSON.h */,
-				9D611BAF19B539620054BE48 /* Logger.cpp */,
-				9D611BB019B539620054BE48 /* Logger.h */,
-				9D611BC419B5761F0054BE48 /* Logic.cpp */,
-				9D611BC519B5761F0054BE48 /* Logic.h */,
+				9D6E8ED419DC8EC7009AEC3C /* Program */,
+				9D6E8ED319DC8EA5009AEC3C /* Utilities */,
+				9D6E8ED219DC8E76009AEC3C /* Block Functions */,
 				9D611BBC19B539880054BE48 /* main.cpp */,
 				9D611BA019B539250054BE48 /* Omniscript.1 */,
+			);
+			path = Omniscript;
+			sourceTree = "<group>";
+		};
+		9D6E8ED219DC8E76009AEC3C /* Block Functions */ = {
+			isa = PBXGroup;
+			children = (
+				9DE8A1EB19B6327300929C83 /* Alarms.cpp */,
+				9DE8A1EC19B6327300929C83 /* Alarms.h */,
+				9DE8A1E819B6321300929C83 /* HVAC.cpp */,
+				9DE8A1E919B6321300929C83 /* HVAC.h */,
+				9D611BC419B5761F0054BE48 /* Logic.cpp */,
+				9D611BC519B5761F0054BE48 /* Logic.h */,
 				9DE8A1E519B62D8700929C83 /* Operators.cpp */,
 				9DE8A1E619B62D8700929C83 /* Operators.h */,
-				9D611BB319B539620054BE48 /* Script.cpp */,
-				9D611BB419B539620054BE48 /* Script.h */,
 				9D611BB119B539620054BE48 /* Triggers.cpp */,
 				9D611BB219B539620054BE48 /* Triggers.h */,
 				9D611BC119B574670054BE48 /* Variables.cpp */,
 				9D611BC219B574670054BE48 /* Variables.h */,
 			);
-			path = Omniscript;
+			name = "Block Functions";
+			sourceTree = "<group>";
+		};
+		9D6E8ED319DC8EA5009AEC3C /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				9D611BA919B539620054BE48 /* DBConnection.cpp */,
+				9D611BAA19B539620054BE48 /* DBConnection.h */,
+				9D611BAD19B539620054BE48 /* JSON.cpp */,
+				9D611BAE19B539620054BE48 /* JSON.h */,
+				9D611BAF19B539620054BE48 /* Logger.cpp */,
+				9D611BB019B539620054BE48 /* Logger.h */,
+			);
+			name = Utilities;
+			sourceTree = "<group>";
+		};
+		9D6E8ED419DC8EC7009AEC3C /* Program */ = {
+			isa = PBXGroup;
+			children = (
+				9D4580FA19BF83250069B7C2 /* BaseFunctor.cpp */,
+				9D4580FB19BF83250069B7C2 /* BaseFunctor.h */,
+				9D611BA719B539620054BE48 /* Block.cpp */,
+				9D611BA819B539620054BE48 /* Block.h */,
+				9D611BAB19B539620054BE48 /* Interpreter.cpp */,
+				9D611BAC19B539620054BE48 /* Interpreter.h */,
+				9D611BB319B539620054BE48 /* Script.cpp */,
+				9D611BB419B539620054BE48 /* Script.h */,
+			);
+			name = Program;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

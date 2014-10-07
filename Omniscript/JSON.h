@@ -16,6 +16,7 @@
 
 #include "jsoncpp/json/json.h"
 #include "Block.h"
+#include "Variables.h"
 
 using block_ptr = blocks::Block::block_ptr;
 
@@ -35,7 +36,8 @@ namespace util {
 		
 	public:
 		static std::vector<block_ptr> build(std::istream*);
-		
+		static std::vector<std::shared_ptr<interp::Variable> > getVars(std::istream*);
+		static std::vector<std::shared_ptr<interp::Point> > getPoints(std::istream*);
 	};
 	
 }

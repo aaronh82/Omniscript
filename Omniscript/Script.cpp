@@ -12,17 +12,20 @@
 
 namespace script {
 	Script::Script(std::string name, uint id, std::string lastModified, std::istream *data, bool enabled):
-					name_(name), id_(id), enabled_(enabled) {
+		name_(name), id_(id), enabled_(enabled) {
+		
 		startingBlocks_ = util::JSON::build(data);
+		variables_ = util::JSON::getVars(data);
+		points_ = util::JSON::getPoints(data);
 		time_t curTime = convertTime(lastModified);
 		if (curTime > lastModified_) {
 			lastModified_ = curTime;
 		}
 	}
 	
-	time_t Script::convertTime(std::string sqlTime) {
-		std::string date = getDate(sqlTime);
-		std::string time = getTime(sqlTime);
+	time_t Script::convertTime(std::string sql_time) {
+		std::string date = getDate(sql_time);
+		std::string time = getTime(sql_time);
 		
 		std::unique_ptr<tm> time_info(new tm);
 		
@@ -76,7 +79,10 @@ namespace script {
 	}
 	
 	// Public
-	std::string Script::name() {
+	std::string Script::name(std::string n) {
+		if (!n.empty()) {
+			name_ = n;
+		}
 		return name_;
 	}
 	
@@ -90,6 +96,14 @@ namespace script {
 	
 	uint Script::id() const {
 		return id_;
+	}
+	
+	std::vector<std::shared_ptr<interp::Variable> > Script::variables() const {
+		return variables_;
+	}
+	
+	std::vector<std::shared_ptr<interp::Point> > Script::points() const {
+		return points_;
 	}
 	
 	void Script::enable() {
@@ -110,5 +124,24 @@ namespace script {
 	
 	const std::vector<block_ptr> Script::startingBlocks() const {
 		return startingBlocks_;
+	}
+	
+	bool Script::updated(std::string sql_time) {
+		time_t new_time = convertTime(sql_time);
+		if (new_time > lastModified_) {
+			lastModified_ = new_time;
+			return true;
+		}
+		return false;
+	}
+	
+	void Script::updateScript(std::istream *data) {
+		startingBlocks_ = util::JSON::build(data);
+		variables_ = util::JSON::getVars(data);
+		points_ = util::JSON::getPoints(data);
+	}
+	
+	bool Script::needsRestart() {
+		return restart_;
 	}
 }

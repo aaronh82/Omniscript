@@ -13,6 +13,8 @@
 #include "Block.h"
 #include "BaseFunctor.h"
 
+#include <string>
+
 using block_ptr = blocks::Block::block_ptr;
 
 namespace interp {
@@ -20,13 +22,23 @@ namespace interp {
 	class highTempLimit: public VoidFunctor {
 	public:
 		highTempLimit(){}
-		void operator()(const block_ptr&);
+		void operator()(const block_ptr&, Interpreter&);
 	};
 	
 	class lowTempLimit: public VoidFunctor {
 	public:
 		lowTempLimit(){}
-		void operator()(const block_ptr&);
+		void operator()(const block_ptr&, Interpreter&);
+	};
+	
+	struct Alarm {
+		std::string name;
+		uint alarm_id;
+		std::string type;
+		uint path_id;
+		uint device_id;
+		uint point_id;
+		time_t date_created;
 	};
 }
 

@@ -19,37 +19,37 @@ namespace interp {
 	class whenOn: public VoidFunctor {
 	public:
 		whenOn(){}
-		void operator()(const block_ptr&);
+		void operator()(const block_ptr&, Interpreter&);
 	};
 	
 	class whenSchedule: public VoidFunctor {
 	public:
 		whenSchedule(){}
-		void operator()(const block_ptr&);
+		void operator()(const block_ptr&, Interpreter&);
 	};
 	
 	class whenBool: public VoidFunctor {
 	public:
 		whenBool(){}
-		void operator()(const block_ptr&);
+		void operator()(const block_ptr&, Interpreter&);
 	};
 	
 	class whenIReceive: public VoidFunctor {
 	public:
 		whenIReceive(){}
-		void operator()(const block_ptr&);
+		void operator()(const block_ptr&, Interpreter&);
 	};
 	
 	class broadcast: public VoidFunctor {
 	public:
 		broadcast(){}
-		void operator()(const block_ptr&);
+		void operator()(const block_ptr&, Interpreter&);
 	};
 	
 	class doBroadcastAndWait: public VoidFunctor {
 	public:
 		doBroadcastAndWait(){}
-		void operator()(const block_ptr&);
+		void operator()(const block_ptr&, Interpreter&);
 	};
 }
 

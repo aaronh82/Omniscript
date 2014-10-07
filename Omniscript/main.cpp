@@ -36,7 +36,7 @@ void process(const script::Script& prog) {
 	if (prog.isEnabled()) {
 		if (pid_list.find(id) == pid_list.end()) {
 			LOG(Log::DEBUGGING, prog.name() + " is " + (prog.isEnabled() ? "Enabled" : "Disabled"));
-			interp::Interpreter interp(prog.startingBlocks());
+			interp::Interpreter interp(prog);
 			std::shared_future<void> f(std::async(std::launch::async, &interp::Interpreter::start, &interp));
 			sleep(1);
 			if (f.valid()) {
@@ -49,7 +49,7 @@ void process(const script::Script& prog) {
 		for (auto thread : pid_list) {
 			if ((thread.second).wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
 				LOG(Log::DEBUGGING, "Restarting " + prog.name() + "(" + std::to_string(thread.first) + ")");
-				interp::Interpreter interp(prog.startingBlocks());
+				interp::Interpreter interp(prog);
 				thread.second = std::async(std::launch::async, &interp::Interpreter::start, &interp);
 				sleep(1);
 			}
@@ -109,8 +109,11 @@ int main(int argc, const char * argv[])
 													res->getString("last_modified"),
 													res->getBlob("data"),
 													res->getBoolean("enabled")));
-			} else {
+			} else if ((*it)->updated(res->getString("last_modified"))){
+				(*it)->name(res->getString("name"));
+				(*it)->updateScript(res->getBlob("data"));
 				res->getBoolean("enabled") ? (*it)->enable() : (*it)->disable();
+				
 			}
 		}
 		

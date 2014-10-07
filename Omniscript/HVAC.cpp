@@ -7,15 +7,64 @@
 //
 
 #include "HVAC.h"
+#include "Interpreter.h"
+
+#include <future>
+#include <vector>
 
 namespace interp {
-	bool coolSetpoint::operator()(const block_ptr &b) {
+		
+	bool cooling = false;
+	bool heating = false;
+	
+	bool coolSetpoint::operator()(const block_ptr &b, Interpreter &interp) {
+		if (b->args().size() != 3) {
+			throw "The wrong number of arguments was provided to 'coolSetpoint'";
+		}
+		float sp = (b->args()[0].find("block:") != std::string::npos) ?
+					interp.execute(b->blockArgs()[stoi(b->args()[0].substr(b->args()[0].find(":") + 1))]) :
+					stof(b->args()[0]);
+		float db = (b->args()[1].find("block:") != std::string::npos) ?
+					interp.execute(b->blockArgs()[stoi(b->args()[1].substr(b->args()[1].find(":") + 1))]) :
+					stof(b->args()[1]);
+		float in = (b->args()[2].find("block:") != std::string::npos) ?
+					interp.execute(b->blockArgs()[stoi(b->args()[2].substr(b->args()[2].find(":") + 1))]) :
+					stof(b->args()[2]);
+		
 		LOG(Log::DEBUGGING, "coolSetpoint");
-		return true;
+		
+		if (cooling && (in < (sp - db))) {
+			LOG(Log::DEBUGGING, "Setting cooling to false");
+			cooling = false;
+		} else if (!cooling && (in > (sp + db))) {
+			LOG(Log::DEBUGGING, "Setting cooling to true");
+			cooling = true;
+		}
+		return cooling;
 	}
 	
-	bool heatSetpoint::operator()(const block_ptr &b) {
+	bool heatSetpoint::operator()(const block_ptr &b, Interpreter &interp) {
+		if (b->args().size() != 3) {
+			throw "The wrong number of arguments was provided to 'heatSetpoint'";
+		}
+		float sp = (b->args()[0].find("block:") != std::string::npos) ?
+					interp.execute(b->blockArgs()[stoi(b->args()[0].substr(b->args()[0].find(":") + 1))]) :
+					stof(b->args()[0]);
+		float db = (b->args()[1].find("block:") != std::string::npos) ?
+					interp.execute(b->blockArgs()[stoi(b->args()[1].substr(b->args()[1].find(":") + 1))]) :
+					stof(b->args()[1]);
+		float in = (b->args()[2].find("block:") != std::string::npos) ?
+					interp.execute(b->blockArgs()[stoi(b->args()[2].substr(b->args()[2].find(":") + 1))]) :
+					stof(b->args()[2]);
+
+		
 		LOG(Log::DEBUGGING, "heatSetpoint");
-		return true;
+		
+		if (heating && (in > (sp + db))) {
+			heating = false;
+		} else if (!heating && (in < (sp - db))) {
+			heating = true;
+		}
+		return heating;
 	}
 }

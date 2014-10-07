@@ -13,22 +13,22 @@
 #include "Block.h"
 #include "BaseFunctor.h"
 
+#include <string>
+
 using block_ptr = blocks::Block::block_ptr;
 
 namespace interp {
 	
 	class coolSetpoint: public BoolFunctor {
-		int sp_, db_, in_;
 	public:
 		coolSetpoint(){}
-		bool operator()(const block_ptr&);
+		bool operator()(const block_ptr&, Interpreter&);
 	};
 	
 	class heatSetpoint: public BoolFunctor {
-		int sp_, db_, in_;
 	public:
 		heatSetpoint(){}
-		bool operator()(const block_ptr&);
+		bool operator()(const block_ptr&, Interpreter&);
 	};
 }
 

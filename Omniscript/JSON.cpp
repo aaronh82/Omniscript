@@ -89,7 +89,7 @@ namespace util {
 					curBlock->setOpcode("nested");
 					block_ptr b;
 					addNestedBlocks(*opArg, b);
-					curBlock->setNestedStart(b);
+					curBlock->addNestedStart(b);
 				} else {
 					curBlock->setOpcode((*opArg).asString());
 				}
@@ -101,8 +101,8 @@ namespace util {
 						opStr = "block:" + std::to_string(i++);
 						blockArgs.push_back(b);
 					}
-				} else if ((*opArg).isInt()) {
-					opStr = std::to_string((*opArg).asInt());
+				} else if ((*opArg).isNumeric()) {
+					opStr = std::to_string((*opArg).asDouble());
 				} else {
 					opStr = (*opArg).asString();
 				}
@@ -117,6 +117,32 @@ namespace util {
 		}
 		if (args.size() > 0) curBlock->setArgs(args);
 		if (blockArgs.size() > 0) curBlock->setBlockArgs(blockArgs);
+	}
+	
+	std::vector<std::shared_ptr<interp::Variable> > JSON::getVars(std::istream *is) {
+		const Json::Value varRoot = root_["variables"];
+		std::vector<std::shared_ptr<interp::Variable> > variables;
+		for (auto var : varRoot) {
+			variables.emplace_back(std::make_shared<interp::Variable>(var["name"].asString(),
+																	  var["type"].asString(),
+																	  var["value"].asDouble()));
+		}
+		return variables;
+	}
+	
+	std::vector<std::shared_ptr<interp::Point> > JSON::getPoints(std::istream *is) {
+		const Json::Value pointRoot = root_["points"];
+		std::vector<std::shared_ptr<interp::Point> > points;
+		for (auto point: pointRoot) {
+			points.emplace_back(std::make_shared<interp::Point>(point["name"].asString(),
+																point["type"].asString(),
+																point["value"].asDouble(),
+																point["pointId"].asUInt(),
+																point["typeId"].asUInt(),
+																point["deviceId"].asUInt(),
+																point["pathId"].asUInt()));
+		}
+		return points;
 	}
 	
 }

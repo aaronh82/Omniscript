@@ -11,9 +11,13 @@
 
 #include "Block.h"
 
+#include <memory>
+
 using block_ptr = blocks::Block::block_ptr;
 
 namespace interp {
+	class Interpreter;
+	
 	class BaseFunctor {
 	public:
 		BaseFunctor(){}
@@ -23,19 +27,25 @@ namespace interp {
 	class VoidFunctor: public BaseFunctor {
 	public:
 		VoidFunctor(){}
-		virtual void operator()(const block_ptr&) = 0;
+		virtual void operator()(const block_ptr&, Interpreter&) = 0;
 	};
 	
 	class BoolFunctor: public BaseFunctor {
 	public:
 		BoolFunctor(){}
-		virtual bool operator()(const block_ptr&) = 0;
+		virtual bool operator()(const block_ptr&, Interpreter&) = 0;
+	};
+	
+	class IntFunctor: public BaseFunctor {
+	public:
+		IntFunctor(){}
+		virtual int operator()(const block_ptr&, Interpreter&) = 0;
 	};
 	
 	class FloatFunctor: public BaseFunctor {
 	public:
 		FloatFunctor(){}
-		virtual float operator()(const block_ptr&) = 0;
+		virtual float operator()(const block_ptr&, Interpreter&) = 0;
 	};
 }
 

@@ -35,17 +35,19 @@ namespace interp {
 	};
 	
 	class Point : public Variable {
-		uint16_t point_id_;
-		uint16_t type_id_;
-		uint16_t device_id_;
-		uint16_t path_id_;
+		unsigned int point_id_;
+		unsigned int type_id_;
+		unsigned int device_id_;
+		std::string device_name_;
+		unsigned int path_id_;
 	public:
-		Point(std::string, std::string, float, uint, uint, uint, uint);
+		Point(const std::string&, const std::string&, float, unsigned int, unsigned int, const std::string&, unsigned int);
 		
-		uint pointId();
-		uint typeId();
-		uint deviceId();
-		uint pathId();
+		unsigned int pointId();
+		unsigned int typeId();
+		unsigned int deviceId();
+		std::string deviceName();
+		unsigned int pathId();
 	};
 	
 	class readVariable: public FloatFunctor {
@@ -91,7 +93,7 @@ namespace interp {
 		bool operator()(std::shared_ptr<Variable>);
 	};
 	
-	void writePointValue(const float&, std::vector<std::shared_ptr<Point> >::iterator);
+	void writePointValue(const float&, std::vector<std::shared_ptr<Point> >::const_iterator);
 }
 
 #endif /* defined(__Omniscript__Variables__) */

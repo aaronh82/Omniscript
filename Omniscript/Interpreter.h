@@ -24,26 +24,27 @@
 
 using block_ptr = blocks::Block::block_ptr;
 
+namespace script {
+	class Script;
+}
+
 namespace interp {
 
 	class Interpreter {
 		typedef std::map<std::string, std::shared_ptr<BaseFunctor> > func_map;
 		func_map primTable;
-		std::vector<block_ptr> scripts_;
-		std::vector<std::shared_ptr<Variable> > variables_;
-		std::vector<std::shared_ptr<Point> > points_;
-				
+		script::Script& program_;
+		
 		void initPrims();
 		float callFunc(const func_map::const_iterator&, const block_ptr&);
-//		float callFunc(const func_map::const_iterator&, const block_ptr&, Interpreter&);
 		
 	public:
-		Interpreter(const script::Script&);
+		Interpreter(script::Script&);
 		
 		void start();
 		float execute(const block_ptr&);
-		std::vector<std::shared_ptr<Variable> > variables();
-		std::vector<std::shared_ptr<Point> > points();
+		const std::vector<std::shared_ptr<Variable> >& variables();
+		const std::vector<std::shared_ptr<Point> >& points();
 	};
 	
 }

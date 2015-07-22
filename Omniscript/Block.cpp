@@ -10,7 +10,18 @@
 
 namespace blocks {
 
+	Block::Block():opcode_(""), next_(nullptr) {
+		args_ = {};
+		blockArgs_ = {};
+		nestedBlocks_ = {};
+		listBlocks_ = {};
+	}
+	
 	Block::Block(std::string opcode, block_ptr next): opcode_(opcode), next_(next) {
+		args_ = {};
+		blockArgs_ = {};
+		nestedBlocks_ = {};
+		listBlocks_ = {};
 	}
 	
 	void Block::setOpcode(std::string op) {
@@ -45,10 +56,20 @@ namespace blocks {
 		return nestedBlocks_;
 	}
 	
+	void Block::addListBlocks(block_ptr b) {
+		listBlocks_.push_back(b);
+	}
+	
+	std::vector<Block::block_ptr> Block::listBlocks() {
+		return listBlocks_;
+	}
+	
+	Block::block_ptr Block::next() {
+		return next_;
+	}
+	
 	Block::block_ptr Block::next(Block::block_ptr n) {
-		if (n) {
-			next_ = n;
-		}
+		next_ = n;
 		return next_;
 	}
 	

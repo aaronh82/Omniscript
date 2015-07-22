@@ -15,6 +15,7 @@
 #include <cmath>
 #include <algorithm>
 #include <numeric>
+//#include <libplatform/libplatform.h>
 
 namespace interp {
 	
@@ -99,9 +100,10 @@ namespace interp {
 		float y = (b->args()[1].find("block:") != std::string::npos) ?
 					interp.execute(b->blockArgs()[std::stoi(b->args()[1].substr(b->args()[1].find(":") + 1))]) :
 					std::stof(b->args()[1]);
-		
+//		int i;
+		static const float ep = 1.0e-3;
 		LOG(Log::DEBUGGING, "equalTo");
-		return x == y;
+		return std::fabs(x - y) < ep;
 	}
 	
 	bool greaterThan::operator()(const block_ptr &b, Interpreter &interp) {
@@ -210,6 +212,14 @@ namespace interp {
 		return -1;
 	}
 	
+	bool reportTrue::operator()(const block_ptr &b, Interpreter &interp) {
+		return true;
+	}
+	
+	bool reportFalse::operator()(const block_ptr &b, Interpreter &interp) {
+		return false;
+	}
+	
 	void maxOf::operator()(const block_ptr &b, Interpreter &interp) {
 		std::vector<block_ptr>::iterator maxBlock = std::max_element(b->nestedBlocks().begin(), b->nestedBlocks().end());
 		const float maxValue = interp.execute(*maxBlock);
@@ -245,4 +255,72 @@ namespace interp {
 				interp.execute(b->blockArgs()[std::stoi(b->args()[0].substr(b->args()[0].find(":") + 1))]) :
 				std::stof(b->args()[0]);
 	}
+	
+//	typedef std::shared_ptr<Isolate> iso_ptr;
+//	typedef std::shared_ptr<Platform> plat_ptr;
+//	plat_ptr initializeV8();
+//	bool executeScript(iso_ptr, Handle<String>&, Handle<Value>&);
+//	static void LogCallBack(const FunctionCallbackInfo<Value>&);
+//	
+//	void reportJSFunction::operator()(const block_ptr &b, Interpreter &interp) {
+//		
+//		plat_ptr platform(initializeV8());
+//		iso_ptr isolate = std::make_shared<Isolate>(Isolate::New());
+//		Isolate::Scope isolate_scope(isolate.get());
+//		HandleScope handle_scope(isolate.get());
+//		Handle<ObjectTemplate> global = ObjectTemplate::New(isolate.get());
+//		global->Set(String::NewFromUtf8(isolate.get(), "log"), FunctionTemplate::New(isolate.get(), LogCallBack));
+//		Handle<Context> context = Context::New(isolate.get(), NULL, global);
+//		Context::Scope context_scope(context);
+//		Handle<String> script = String::NewFromUtf8(isolate.get(), (b->args()[1]).c_str());
+//		Handle<Value> result;
+//		if (executeScript(isolate, script, result)) {
+//			
+//		}
+//		isolate->Dispose();
+//		V8::Dispose();
+//		V8::ShutdownPlatform();
+//	}
+//	
+//#pragma V8 Helper Functions
+//	
+//	plat_ptr initializeV8() {
+//		V8::InitializeICU();
+//		plat_ptr platform = std::make_shared<Platform>(platform::CreateDefaultPlatform());
+//		V8::InitializePlatform(platform.get());
+//		V8::Initialize();
+//		return platform;
+//	}
+//	
+//	bool executeScript(iso_ptr isolate, Handle<String> &script, Handle<Value> &result) {
+//		HandleScope handle_scope(isolate.get());
+//		
+//		TryCatch try_catch;
+//		
+//		Handle<Script> compiled = Script::Compile(script);
+//		if (compiled.IsEmpty()) {
+//			String::Utf8Value error(try_catch.Exception());
+//			LOG(Log::ERROR, "Javascript error: ");
+//			LOG(Log::ERROR, *error);
+//			return false;
+//		}
+//		
+//		result = compiled->Run();
+//		if (result.IsEmpty()) {
+//			String::Utf8Value error(try_catch.Exception());
+//			LOG(Log::ERROR, "Javascript error: ");
+//			LOG(Log::ERROR, *error);
+//			return false;
+//		}
+//		return true;
+//	}
+//	
+//	static void LogCallBack(const FunctionCallbackInfo<Value> &args) {
+//		if (args.Length() < 1) return;
+//		HandleScope scope(args.GetIsolate());
+//		Handle<Value> arg = args[0];
+//		String::Utf8Value value(arg);
+//		LOG(Log::WARN, *value);
+//	}
+
 }

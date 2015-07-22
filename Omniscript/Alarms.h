@@ -13,8 +13,6 @@
 #include "Block.h"
 #include "BaseFunctor.h"
 
-#include <string>
-
 using block_ptr = blocks::Block::block_ptr;
 
 namespace interp {
@@ -31,15 +29,12 @@ namespace interp {
 		void operator()(const block_ptr&, Interpreter&);
 	};
 	
-	struct Alarm {
-		std::string name;
-		uint alarm_id;
-		std::string type;
-		uint path_id;
-		uint device_id;
-		uint point_id;
-		time_t date_created;
+	class customAlarm: public VoidFunctor {
+	public:
+		customAlarm(){}
+		void operator()(const block_ptr&, Interpreter&);
 	};
+	
 }
 
 #endif /* defined(__Omniscript__Alarms__) */

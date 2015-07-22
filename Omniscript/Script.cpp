@@ -8,22 +8,21 @@
 
 #include "Script.h"
 #include "Logger.h"
-#include "JSON.h"
 
 namespace script {
-	Script::Script(std::string name, uint id, std::string lastModified, std::istream *data, bool enabled):
-		name_(name), id_(id), enabled_(enabled) {
-		
-		startingBlocks_ = util::JSON::build(data);
-		variables_ = util::JSON::getVars(data);
-		points_ = util::JSON::getPoints(data);
-		time_t curTime = convertTime(lastModified);
+	
+	Script::Script(std::string name, unsigned int id, std::string lastModified,			std::istream *data, bool enabled):
+				name_(name), id_(id), enabled_(enabled), restart_(false) {
+	
+		startingBlocks_ = util::XML::build(data, *this);
+		std::time_t curTime = convertTime(lastModified);
+			
 		if (curTime > lastModified_) {
 			lastModified_ = curTime;
 		}
 	}
 	
-	time_t Script::convertTime(std::string sql_time) {
+	std::time_t Script::convertTime(std::string sql_time) {
 		std::string date = getDate(sql_time);
 		std::string time = getTime(sql_time);
 		
@@ -90,19 +89,19 @@ namespace script {
 		return name_;
 	}
 	
-	uint Script::id() {
+	unsigned int Script::id() {
 		return id_;
 	}
 	
-	uint Script::id() const {
+	unsigned int Script::id() const {
 		return id_;
 	}
 	
-	std::vector<std::shared_ptr<interp::Variable> > Script::variables() const {
+	const std::vector<std::shared_ptr<interp::Variable> >& Script::variables() const {
 		return variables_;
 	}
 	
-	std::vector<std::shared_ptr<interp::Point> > Script::points() const {
+	const std::vector<std::shared_ptr<interp::Point> >& Script::points() const {
 		return points_;
 	}
 	
@@ -122,12 +121,12 @@ namespace script {
 		return enabled_;
 	}
 	
-	const std::vector<block_ptr> Script::startingBlocks() const {
+	std::map<int, block_ptr> Script::startingBlocks() {
 		return startingBlocks_;
 	}
 	
 	bool Script::updated(std::string sql_time) {
-		time_t new_time = convertTime(sql_time);
+		std::time_t new_time = convertTime(sql_time);
 		if (new_time > lastModified_) {
 			lastModified_ = new_time;
 			return true;
@@ -136,9 +135,7 @@ namespace script {
 	}
 	
 	void Script::updateScript(std::istream *data) {
-		startingBlocks_ = util::JSON::build(data);
-		variables_ = util::JSON::getVars(data);
-		points_ = util::JSON::getPoints(data);
+		startingBlocks_ = util::XML::build(data, *this);
 	}
 	
 	bool Script::needsRestart() {

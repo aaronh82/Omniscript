@@ -15,7 +15,7 @@
 
 namespace interp {
 
-	void waitFor::operator()(const block_ptr &b, Interpreter &interp) {
+	void doWait::operator()(const block_ptr &b, Interpreter &interp) {
 		int x = (b->args()[0].find("block:") != std::string::npos) ?
 					interp.execute(b->blockArgs()[std::stoi(b->args()[0].substr(b->args()[0].find(":") + 1))]) :
 					std::stoi(b->args()[0]);
@@ -42,7 +42,7 @@ namespace interp {
 											   
 	void doIf::operator()(const block_ptr &b, Interpreter &interp) {
 		bool condition = interp.execute(b->blockArgs()[0]);
-		if (condition) {
+		if (condition && !b->nestedBlocks().empty()) {
 			interp.execute(b->nestedBlocks()[0]);
 		}
 		LOG(Log::DEBUGGING, "doIf");
@@ -50,10 +50,12 @@ namespace interp {
 														
 	void doIfElse::operator()(const block_ptr &b, Interpreter &interp) {
 		bool condition = interp.execute(b->blockArgs()[0]);
-		if (condition) {
-			interp.execute(b->nestedBlocks()[0]);
-		} else {
-			interp.execute(b->nestedBlocks()[1]);
+		if (!b->nestedBlocks().empty()) {
+			if (condition) {
+				interp.execute(b->nestedBlocks()[0]);
+			} else {
+				interp.execute(b->nestedBlocks()[1]);
+			}
 		}
 		LOG(Log::DEBUGGING, "doIfElse");
 	}
@@ -71,11 +73,4 @@ namespace interp {
 		}
 		LOG(Log::DEBUGGING, "doUntil");
 	}
-												 
-//	void stopScripts::operator()(const block_ptr &b, Interpreter &interp) {
-//		auto id = std::this_thread::get_id();
-//		std::stringstream ss;
-//		ss << id;
-//		LOG(Log::DEBUGGING, "stopScripts: " + ss.str());
-//	}
 }

@@ -16,6 +16,11 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <cstdlib>
+#include <regex>
+
+#include <unistd.h>
+#include <stdio.h>
 
 namespace interp {
 	std::mutex m;
@@ -24,14 +29,52 @@ namespace interp {
 	std::atomic<bool> ready(false);
 	std::atomic<bool> running(false);
 	
+	std::string exec(const std::string& cmd) {
+		FILE *pipe = popen(cmd.c_str(), "r");
+		if (!pipe) {
+			LOG(Log::ERROR, "Failed to execute '" + std::string(cmd) + "'");
+		}
+		char buffer[128];
+		std::string res = "";
+		while (!feof(pipe)) {
+			if (fgets(buffer, 128, pipe) != NULL) {
+				res += buffer;
+			}
+		}
+		pclose(pipe);
+		
+		if (res.find("YES") != std::string::npos) {
+			return "YES";
+		}
+		return "NO";
+	}
+	
+	bool getSchedStatus(const std::string& name) {
+		std::string cmd("/usr/bin/php -f "
+						"/var/www/maverick/app/public_htdocs/api.php "
+						"target=schedule action=get_status "
+						"name=" + name + " output=text");
+		return exec(cmd) == "YES";
+	}
+	
 	void whenOn::operator()(const block_ptr &b, Interpreter &interp) {
 		LOG(Log::DEBUGGING, "whenOn");
 	}
 	
 	void whenSchedule::operator()(const block_ptr &b, Interpreter &interp) {
-
-//		DB_READ("SELECT (active, name")
-		LOG(Log::DEBUGGING, "whenSchedule");
+		const std::string name = b->args()[0];
+		while (!getSchedStatus(name))
+			sleep(60);
+		
+		LOG(Log::DEBUGGING, "whenSchedule: " + name);
+	}
+	
+	void whenNotSchedule::operator()(const block_ptr &b, Interpreter &interp) {
+		const std::string name = b->args()[0];
+		while (getSchedStatus(name))
+			sleep(60);
+		
+		LOG(Log::DEBUGGING, "whenNotSchedule: " + name);
 	}
 	
 	void whenBool::operator()(const block_ptr &b, Interpreter &interp) {
@@ -64,7 +107,7 @@ namespace interp {
 		}
 	}
 	
-	void broadcast::operator()(const block_ptr &b, Interpreter &interp) {
+	void doBroadcast::operator()(const block_ptr &b, Interpreter &interp) {
 		LOG(Log::DEBUGGING, "broadcast:" + b->args()[0]);
 		std::unique_lock<std::mutex> lock(m);
 		msgs.emplace_back(std::make_shared<std::string>(b->args()[0]));
@@ -81,5 +124,22 @@ namespace interp {
 		auto inMsgs = [&](std::shared_ptr<std::string> s) {
 			return s->compare(b->args()[0]) == 0; };
 		while (std::find_if(msgs.begin(), msgs.end(), inMsgs) != msgs.end());
+	}
+	
+	void getLastMessage::operator()(const block_ptr &b, Interpreter &interp) {
+		// TODO
+	}
+	
+	void doStopThis::operator()(const block_ptr &b, Interpreter &interp) {
+		// TODO
+	}
+	
+	void doStopOthers::operator()(const block_ptr &b, Interpreter &interp) {
+		// TODO
+	}
+	
+	bool reportGetSched::operator()(const block_ptr &b, Interpreter &interp) {
+		std::string name = b->args()[0];
+		return getSchedStatus(name);
 	}
 }

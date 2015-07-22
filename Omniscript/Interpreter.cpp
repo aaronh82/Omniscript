@@ -15,81 +15,102 @@
 #include "Alarms.h"
 #include "Logger.h"
 
+#include <chrono>
+#include <unistd.h>
 
 namespace interp {
 	
-	Interpreter::Interpreter(const script::Script &prog):
-		scripts_(prog.startingBlocks()), variables_(prog.variables()), points_(prog.points()) {
+	Interpreter::Interpreter(script::Script &prog): program_(prog) {
 			initPrims();
 	}
 	
 	void Interpreter::initPrims() {
 		// Triggers
-		primTable["whenOn"]							= std::make_shared<whenOn>();
-		primTable["whenSchedule"]					= std::make_shared<whenSchedule>();
-		primTable["whenBool"]						= std::make_shared<whenBool>();
-		primTable["whenIReceive"]					= std::make_shared<whenIReceive>();
-		primTable["broadcast:"]						= std::make_shared<broadcast>();
-		primTable["doBroadcastAndWait"]				= std::make_shared<doBroadcastAndWait>();
+		primTable["whenOn"]					= std::make_shared<whenOn>();
+		primTable["whenSchedule"]			= std::make_shared<whenSchedule>();
+		primTable["whenNotSchedule"]		= std::make_shared<whenNotSchedule>();
+		primTable["whenBool"]				= std::make_shared<whenBool>();
+		primTable["whenIReceive"]			= std::make_shared<whenIReceive>();
+		primTable["doBroadcast:"]			= std::make_shared<doBroadcast>();
+		primTable["doBroadcastAndWait"]		= std::make_shared<doBroadcastAndWait>();
+		primTable["getLastMessage"]			= std::make_shared<getLastMessage>();
+		primTable["doStopThis"]				= std::make_shared<doStopThis>();
+		primTable["doStopOthers"]			= std::make_shared<doStopOthers>();
 		
 		// Logic
-		primTable["wait:elapsed:from:"]				= std::make_shared<waitFor>();
-		primTable["doRepeat"]						= std::make_shared<doRepeat>();
-		primTable["doForever"]						= std::make_shared<doForever>();
-		primTable["doIf"]							= std::make_shared<doIf>();
-		primTable["doIfElse"]						= std::make_shared<doIfElse>();
-		primTable["doWaitUntil"]					= std::make_shared<doWaitUntil>();
-		primTable["doUntil"]						= std::make_shared<doUntil>();
-//		primTable["stopScripts"]					= std::make_shared<stopScripts>();
+		primTable["doWait"]					= std::make_shared<doWait>();
+		primTable["doWaitUntil"]			= std::make_shared<doWaitUntil>();
+		primTable["doRepeat"]				= std::make_shared<doRepeat>();
+		primTable["doForever"]				= std::make_shared<doForever>();
+		primTable["doIf"]					= std::make_shared<doIf>();
+		primTable["doIfElse"]				= std::make_shared<doIfElse>();
+		primTable["doUntil"]				= std::make_shared<doUntil>();
 
 		// Operators
-		primTable["+"]								= std::make_shared<add>();
-		primTable["-"]								= std::make_shared<subtract>();
-		primTable["*"]								= std::make_shared<multiply>();
-		primTable["/"]								= std::make_shared<divide>();
-		primTable["randomFrom:to:"]					= std::make_shared<randomFromTo>();
-		primTable["<"]								= std::make_shared<lessThan>();
-		primTable["="]								= std::make_shared<equalTo>();
-		primTable[">"]								= std::make_shared<greaterThan>();
-		primTable["&"]								= std::make_shared<logicalAnd>();
-		primTable["|"]								= std::make_shared<logicalOr>();
-		primTable["not"]							= std::make_shared<logicalNegation>();
-		primTable["%"]								= std::make_shared<modulo>();
-		primTable["rounded"]						= std::make_shared<roundToNearest>();
-		primTable["computeFunction:of:"]			= std::make_shared<computeFunction>();
-		primTable["avg"]							= std::make_shared<avg>();
-		primTable["maxOf"]							= std::make_shared<maxOf>();
-		primTable["minOf"]							= std::make_shared<minOf>();
-		primTable["getValOf"]						= std::make_shared<getValueOf>();
+		primTable["reportSum"]				= std::make_shared<add>();
+		primTable["reportDifference"]		= std::make_shared<subtract>();
+		primTable["reportProduct"]			= std::make_shared<multiply>();
+		primTable["reportQuotient"]			= std::make_shared<divide>();
+		primTable["reportRandom"]			= std::make_shared<randomFromTo>();
+		primTable["reportLessThan"]			= std::make_shared<lessThan>();
+		primTable["reportEquals"]			= std::make_shared<equalTo>();
+		primTable["reportGreaterThan"]		= std::make_shared<greaterThan>();
+		primTable["reportAnd"]				= std::make_shared<logicalAnd>();
+		primTable["reportOr"]				= std::make_shared<logicalOr>();
+		primTable["reportNot"]				= std::make_shared<logicalNegation>();
+		primTable["reportModulus"]			= std::make_shared<modulo>();
+		primTable["reportRound"]			= std::make_shared<roundToNearest>();
+		primTable["reportMonadic"]			= std::make_shared<computeFunction>();
+		primTable["reportTrue"]				= std::make_shared<reportTrue>();
+		primTable["reportFalse"]			= std::make_shared<reportFalse>();
+		primTable["avg"]					= std::make_shared<avg>();
+		primTable["maxOf"]					= std::make_shared<maxOf>();
+		primTable["minOf"]					= std::make_shared<minOf>();
+		primTable["getValOf"]				= std::make_shared<getValueOf>();
+//		primTable["reportJSFunction"]		= std::make_shared<reportJSFunction>();
 		
 		// HVAC
-		primTable["csetpt:db:in:"]					= std::make_shared<coolSetpoint>();
-		primTable["hsetpt:db:in:"]					= std::make_shared<heatSetpoint>();
+		primTable["coolSetpoint"]			= std::make_shared<coolSetpoint>();
+		primTable["heatSetpoint"]			= std::make_shared<heatSetpoint>();
 
 		// Variables
-		primTable["readVariable"]					= std::make_shared<readVariable>();
-		primTable["setVar:to:"]						= std::make_shared<setVar>();
-		primTable["changeVar:by:"]					= std::make_shared<changeVar>();
-		primTable["readPoint"]						= std::make_shared<readPoint>();
-		primTable["setPoint:to:"]					= std::make_shared<setPoint>();
-		primTable["changePoint:by:"]				= std::make_shared<changePoint>();
+		primTable["readVariable"]			= std::make_shared<readVariable>();
+		primTable["doSetVar"]				= std::make_shared<setVar>();
+		primTable["changeVar"]				= std::make_shared<changeVar>();
+		primTable["readPoint"]				= std::make_shared<readPoint>();
+		primTable["doSetPoint"]				= std::make_shared<setPoint>();
+		primTable["doChangePoint"]			= std::make_shared<changePoint>();
 		
 		// Alarms
-		primTable["highTempLimit:in:level:"]		= std::make_shared<highTempLimit>();
-		primTable["lowTempLimit:in:level:"]			= std::make_shared<lowTempLimit>();
+		primTable["highTemp"]				= std::make_shared<highTempLimit>();
+		primTable["lowTemp"]				= std::make_shared<lowTempLimit>();
+		primTable["customAlarm"]			= std::make_shared<customAlarm>();
 	}
 	
 	void Interpreter::start() {
-		std::vector<std::shared_future<float> > threads;
-		for (auto script : scripts_) {
-			if (script->opcode().find("when") == 0) {
-				threads.emplace_back(std::async(std::launch::async, &Interpreter::execute, *this, script));
+		std::map<const int, std::shared_future<float> > threads;
+		for (auto script : program_.startingBlocks()) {
+			if (script.second->opcode().find("when") == 0) {
+				std::shared_future<float> f(std::async(std::launch::async,
+											&Interpreter::execute, *this, script.second));
+				if (f.valid())
+					threads.insert({script.first, f});
 			} else {
-				LOG(Log::ERROR, "A script was not started with a trigger: " + script->opcode());
+				LOG(Log::ERROR, "A script failed to start: " + script.second->opcode());
 			}
 		}
-		for (auto thread : threads) {
-			thread.wait();
+		
+		while (!program_.needsRestart()) {
+			for (auto &thread : threads) {
+				if ((thread.second).wait_for(std::chrono::milliseconds(0))
+					== std::future_status::ready) {
+					const int idx(thread.first);
+					thread.second = std::shared_future<float>(std::async(std::launch::async, &Interpreter::execute, *this, program_.startingBlocks()[idx]));
+				}
+				
+			}
+			sleep(5);
+//			std::this_thread::sleep_for(std::chrono::milliseconds(20));
 		}
 	}
 	
@@ -121,12 +142,12 @@ namespace interp {
 		return 0;
 	}
 	
-	std::vector<std::shared_ptr<Variable> > Interpreter::variables() {
-		return variables_;
+	const std::vector<std::shared_ptr<Variable> >& Interpreter::variables() {
+		return program_.variables();
 	}
 	
-	std::vector<std::shared_ptr<Point> > Interpreter::points() {
-		return points_;
+	const std::vector<std::shared_ptr<Point> >& Interpreter::points() {
+		return program_.points();
 	}
 	
 }

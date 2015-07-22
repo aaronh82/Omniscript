@@ -22,12 +22,14 @@ namespace blocks {
 		std::vector<std::string> args_;
 		std::vector<block_ptr_> blockArgs_;
 		std::vector<block_ptr_> nestedBlocks_;
+		std::vector<block_ptr_> listBlocks_;
 		block_ptr_ next_;
 		
 	public:
 		using block_ptr = block_ptr_;
 		
-		Block(std::string = "", block_ptr = nullptr);
+		Block();
+		Block(std::string, block_ptr);
 		~Block() {};
 		
 		void setOpcode(std::string);
@@ -38,7 +40,10 @@ namespace blocks {
 		std::vector<block_ptr> blockArgs();
 		void addNestedStart(block_ptr);
 		std::vector<block_ptr> nestedBlocks();
-		block_ptr next(block_ptr = nullptr);
+		void addListBlocks(block_ptr_);
+		std::vector<block_ptr> listBlocks();
+		block_ptr next();
+		block_ptr next(block_ptr);
 		
 	};
 

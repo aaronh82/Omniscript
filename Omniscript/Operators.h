@@ -12,7 +12,9 @@
 #include "Logger.h"
 #include "Block.h"
 #include "BaseFunctor.h"
+//#include <v8.h>
 
+//using namespace v8;
 using block_ptr = blocks::Block::block_ptr;
 
 namespace interp {
@@ -100,6 +102,18 @@ namespace interp {
 		float operator()(const block_ptr&, Interpreter&);
 	};
 	
+	class reportTrue: public BoolFunctor {
+	public:
+		reportTrue(){}
+		bool operator()(const block_ptr&, Interpreter&);
+	};
+	
+	class reportFalse: public BoolFunctor {
+	public:
+		reportFalse(){}
+		bool operator()(const block_ptr&, Interpreter&);
+	};
+	
 	class maxOf: public VoidFunctor {
 	public:
 		maxOf(){}
@@ -122,6 +136,12 @@ namespace interp {
 	public:
 		getValueOf(){}
 		float operator()(const block_ptr&, Interpreter&);
+	};
+	
+	class reportJSFunction: public VoidFunctor {
+	public:
+		reportJSFunction(){}
+		void operator()(const block_ptr&, Interpreter&);
 	};
 }
 

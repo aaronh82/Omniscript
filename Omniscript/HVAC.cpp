@@ -18,9 +18,6 @@ namespace interp {
 	bool heating = false;
 	
 	bool coolSetpoint::operator()(const block_ptr &b, Interpreter &interp) {
-		if (b->args().size() != 3) {
-			throw "The wrong number of arguments was provided to 'coolSetpoint'";
-		}
 		float sp = (b->args()[0].find("block:") != std::string::npos) ?
 					interp.execute(b->blockArgs()[stoi(b->args()[0].substr(b->args()[0].find(":") + 1))]) :
 					stof(b->args()[0]);
@@ -44,9 +41,6 @@ namespace interp {
 	}
 	
 	bool heatSetpoint::operator()(const block_ptr &b, Interpreter &interp) {
-		if (b->args().size() != 3) {
-			throw "The wrong number of arguments was provided to 'heatSetpoint'";
-		}
 		float sp = (b->args()[0].find("block:") != std::string::npos) ?
 					interp.execute(b->blockArgs()[stoi(b->args()[0].substr(b->args()[0].find(":") + 1))]) :
 					stof(b->args()[0]);

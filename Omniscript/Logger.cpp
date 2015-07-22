@@ -8,7 +8,8 @@
 
 #include <log4cpp/Category.hh>
 #include <log4cpp/Appender.hh>
-#include <log4cpp/FileAppender.hh>
+//#include <log4cpp/FileAppender.hh>
+#include <log4cpp/RollingFileAppender.hh>
 #include <log4cpp/Layout.hh>
 #include <log4cpp/PatternLayout.hh>
 #include <log4cpp/Priority.hh>
@@ -16,9 +17,14 @@
 #include "Logger.h"
 
 namespace Log {
+	const size_t maxFileSize = 500 * 1024;
+	const unsigned int maxBackupIndex = 9;
+	
 	Logger::Logger(): m_cpp_logger(log4cpp::Category::getRoot()) {
-		log4cpp::Appender* p_appender = new log4cpp::FileAppender("default", "/var/log/omniscript.log");
-		
+		log4cpp::Appender* p_appender = new log4cpp::RollingFileAppender("default",
+										 "/var/log/omniscript.log",
+										 maxFileSize,
+										 maxBackupIndex);
 		log4cpp::PatternLayout* layout = new log4cpp::PatternLayout();
 		layout->setConversionPattern("%d{%Y-%m-%d %H:%M:%S} [%p] %c: %m%n");
 		p_appender->setLayout(layout);

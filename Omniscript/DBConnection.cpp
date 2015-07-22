@@ -9,17 +9,78 @@
 #include "Logger.h"
 #include "DBConnection.h"
 
+#include <thread>
+#include <chrono>
+
 namespace conn {
+/*
+#pragma mark DBQueue
+	
+	template<typename Callable, typename... Args>
+	void DBQueue::add(std::thread::id id, Callable&& f, Args&&... args) {
+		m_.lock();
+		std::function<sql::ResultSet*()> func = std::bind(std::forward<Callable>(f), std::forward<Args>(args)...);
+		funcs_.push(std::make_pair(id, func));
+		m_.unlock();
+	}
+	
+	void DBQueue::execute() {
+		while (true) {
+			while (!funcs_.empty()) {
+				std::thread::id id = funcs_.front().first;
+				std::function<sql::ResultSet*()> func = funcs_.front().second;
+				std::shared_ptr<sql::ResultSet> res;
+				try {
+					res.reset(func());
+				} catch (sql::SQLException e) {
+					exceptions_.insert({id, e});
+				}
+				complete_.insert({id, res});
+				funcs_.pop();
+			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(200));
+		}
+	}
+	
+	std::shared_ptr<sql::ResultSet> DBQueue::wait(std::thread::id id) {
+		while (complete_.find(id) == complete_.end() &&
+			   exceptions_.find(id) == exceptions_.end()) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(200));
+		};
+		auto cId = complete_.find(id);
+		std::shared_ptr<sql::ResultSet> res(nullptr);
+		if (cId != complete_.end()) {
+			res = complete_[id];
+			complete_.erase(cId);
+		}
+		return res;
+	}
+	
+	sql::SQLException DBQueue::except(std::thread::id id) {
+		return exceptions_[id];
+	}
+	
+	void DBQueue::delExcept(std::thread::id id) {
+		exceptions_.erase(id);
+	}
+*/	
+#pragma mark DBConnection
 	
 	DBConnection::DBConnection() {
 		try {
 			driver_ = get_driver_instance();
-			conn_ = std::unique_ptr<sql::Connection>(driver_->connect(server_, username_, password_));
-			conn_->setSchema("maverick_data");
-			stmt_ = std::unique_ptr<sql::Statement>(conn_->createStatement());
+			connect();
 		} catch (sql::SQLException e) {
-			LOG(Log::ERROR, "Connection to database failed: " + std::string(e.what()));
+			LOG(Log::ERROR, "Connection to database failed: " +
+				std::string(e.what()));
 		}
+//		fut_ = std::async(std::launch::async, &DBQueue::execute, &commands_);
+	}
+	
+	void DBConnection::connect() {
+		conn_ = std::unique_ptr<sql::Connection>(driver_->connect(server_, username_, password_));
+		conn_->setSchema("maverick_data");
+		stmt_ = std::unique_ptr<sql::Statement>(conn_->createStatement());
 	}
 
 	DBConnection& DBConnection::get_connection() {
@@ -29,52 +90,63 @@ namespace conn {
 	}
 	
 	std::shared_ptr<sql::ResultSet> DBConnection::read(const std::string& query) {
-		
+//		std::thread::id id = std::this_thread::get_id();
+//		commands_.add(id, &sql::Statement::executeQuery, stmt_.get(), query);
+//		res_ = commands_.wait(id);
+		std::lock_guard<std::mutex> lock(mut_);
+		sqlRes res;
 		try {
-			std::shared_ptr<sql::ResultSet> res(stmt_->executeQuery(query));
-			res_ = res;
+			res = execute(query);
 		} catch (sql::SQLException e) {
 			LOG(Log::WARN, "Database read failed: " + std::string(e.what()));
+			if (e.getErrorCode() == 2006 && conn_->isClosed()) {
+                 	       connect();
+			}
+			return read(query);
 		}
-		return res_;
+		return res;
+//		sql::SQLException e = commands_.except(id);
+//		commands_.delExcept(id);
+//		LOG(Log::WARN, "Database read failed: " + std::string(e.what()));
+//		if (e.getErrorCode() == 2006 && conn_->isClosed()) {
+//			connect();
+//		}
 	}
 	
-	void DBConnection::write(const std::string& query) {
+	bool DBConnection::write(const std::string& query) {
+//		std::thread::id id = std::this_thread::get_id();
+//		commands_.add(id, &sql::Statement::executeQuery, stmt_.get(), query);
+//		res_ = commands_.wait(id);
+//		sql::SQLException e = commands_.except(id);
+//		commands_.delExcept(id);
+		std::lock_guard<std::mutex> lock(mut_);
 		try {
-			stmt_->execute(query);
+			execute(query);
 		} catch (sql::SQLException e) {
-			LOG(Log::WARN, "Failed to execute query: " + query + ": " + e.what());
+//			LOG(Log::WARN, "Failed to execute query: " + query + ": " + e.what());
+			if (e.getErrorCode() == 2006 && conn_->isClosed()) {
+				connect();
+				return write(query);
+			} else {
+				return false;
+			}
 		}
-//		std::string fields_str(concat(fields));
-//		std::string values_str(concat(values, '\''));
-//		if (fields.size() != values.size()) {
-//			LOG(Log::WARN, "Field(" + fields_str + ") and Value(" + values_str +
-//				") arguments do not match in size.");
-//			return;
+//		if (e.getErrorCode() == 0) {
+//			return true;
 //		}
-//		try {
-//			LOG(Log::DEBUGGING, "Writing to DB now.");
-//			std::unique_ptr<sql::PreparedStatement> pstmt;
-//			pstmt.reset(conn_->prepareStatement("INSERT INTO ?(?) VALUES (?)"));
-//			pstmt->setString(1, table);
-//			pstmt->setString(2, "name");
-//			pstmt->setString(3, "new_test");
-//			pstmt->execute();
-//		} catch (sql::SQLException e) {
-//			LOG(Log::ERROR, std::string("Write to database failed: %s", e.what()));
+//		LOG(Log::WARN, "Failed to execute query: " + query + ": " + e.what());
+//		if (e.getErrorCode() == 2006 && conn_->isClosed()) {
+//			connect();
 //		}
+//		return false;
+		return true;
 	}
-	
-//	std::string DBConnection::concat(std::initializer_list<std::string> list, const char c) {
-//		std::string res;
-//		for (std::initializer_list<std::string>::const_iterator it = list.begin();
-//			 it != list.end(); ++it) {
-//			if (it != list.begin()) {
-//				res += ", ";
-//			}
-//			res += (c + *it + c);
-//		}
-//		return res;
-//	}
-	
+
+	DBConnection::sqlRes DBConnection::execute(const std::string& query) {
+		try {
+			return sqlRes(stmt_->executeQuery(query));
+		} catch (sql::SQLException e) {
+			throw;
+		};
+	}
 }

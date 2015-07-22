@@ -28,6 +28,12 @@ namespace interp {
 		void operator()(const block_ptr&, Interpreter&);
 	};
 	
+	class whenNotSchedule: public VoidFunctor {
+	public:
+		whenNotSchedule(){}
+		void operator()(const block_ptr&, Interpreter&);
+	};
+	
 	class whenBool: public VoidFunctor {
 	public:
 		whenBool(){}
@@ -40,9 +46,9 @@ namespace interp {
 		void operator()(const block_ptr&, Interpreter&);
 	};
 	
-	class broadcast: public VoidFunctor {
+	class doBroadcast: public VoidFunctor {
 	public:
-		broadcast(){}
+		doBroadcast(){}
 		void operator()(const block_ptr&, Interpreter&);
 	};
 	
@@ -50,6 +56,30 @@ namespace interp {
 	public:
 		doBroadcastAndWait(){}
 		void operator()(const block_ptr&, Interpreter&);
+	};
+	
+	class getLastMessage: public VoidFunctor {
+	public:
+		getLastMessage(){}
+		void operator()(const block_ptr&, Interpreter&);
+	};
+	
+	class doStopThis: public VoidFunctor {
+	public:
+		doStopThis(){}
+		void operator()(const block_ptr&, Interpreter&);
+	};
+	
+	class doStopOthers: public VoidFunctor {
+	public:
+		doStopOthers(){}
+		void operator()(const block_ptr&, Interpreter&);
+	};
+	
+	class reportGetSched: public BoolFunctor {
+	public:
+		reportGetSched(){}
+		bool operator()(const block_ptr&, Interpreter&);
 	};
 }
 

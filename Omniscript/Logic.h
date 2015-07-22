@@ -16,9 +16,9 @@
 using block_ptr = blocks::Block::block_ptr;
 
 namespace interp {
-	class waitFor: public VoidFunctor {
+	class doWait: public VoidFunctor {
 	public:
-		waitFor(){};
+		doWait(){};
 		void operator()(const block_ptr&, Interpreter&);
 	};
 	
@@ -57,12 +57,6 @@ namespace interp {
 		doUntil(){};
 		void operator()(const block_ptr&, Interpreter&);
 	};
-	
-//	class stopScripts: public VoidFunctor {
-//	public:
-//		stopScripts(){};
-//		void operator()(const block_ptr&, Interpreter&);
-//	};
 }
 
 #endif /* defined(__Omniscript__Logic__) */

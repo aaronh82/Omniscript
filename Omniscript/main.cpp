@@ -14,6 +14,7 @@
 #include <vector>
 #include <memory>
 
+#include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <cerrno>
@@ -29,40 +30,58 @@
 #include "Logger.h"
 #include "Script.h"
 
-std::map<uint, std::shared_future<void>> pid_list;
+#include <execinfo.h>
 
-void process(const script::Script& prog) {
-	uint id = prog.id();
+typedef std::shared_ptr<interp::Interpreter> interp_ptr;
+typedef std::pair<interp_ptr, std::shared_future<void> > prog_map;
+std::map<unsigned int, prog_map> pid_list;
+
+void process(script::Script& prog) {
+	unsigned int id = prog.id();
 	if (prog.isEnabled()) {
 		if (pid_list.find(id) == pid_list.end()) {
 			LOG(Log::DEBUGGING, prog.name() + " is " + (prog.isEnabled() ? "Enabled" : "Disabled"));
-			interp::Interpreter interp(prog);
-			std::shared_future<void> f(std::async(std::launch::async, &interp::Interpreter::start, &interp));
+			interp_ptr interp(std::make_shared<interp::Interpreter>(prog));
+			std::shared_future<void> f(std::async(std::launch::async, &interp::Interpreter::start, interp));
 			sleep(1);
 			if (f.valid()) {
-				pid_list.insert(std::pair<uint, std::shared_future<void> >(id, f));
+				prog_map pm(interp, f);
+				pid_list.insert({id, pm});
 			} else {
 				LOG(Log::WARN, "Thread for " + prog.name() + " did not initialize");
 			}
 		}
 		
 		for (auto thread : pid_list) {
-			if ((thread.second).wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
-				LOG(Log::DEBUGGING, "Restarting " + prog.name() + "(" + std::to_string(thread.first) + ")");
-				interp::Interpreter interp(prog);
-				thread.second = std::async(std::launch::async, &interp::Interpreter::start, &interp);
+			if ((thread.second.second).wait_for(std::chrono::milliseconds(0))
+				== std::future_status::ready) {
+				LOG(Log::DEBUGGING, "Restarting " + prog.name());
+				thread.second.second = std::async(std::launch::async, &interp::Interpreter::start, thread.second.first);
 				sleep(1);
 			}
-			//		} else {
-			//			LOG(Log::DEBUGGING, "Thread " + std::to_string(thread.first) + " is still running");
-			//		}
 		}
 	}
+}
+
+void stackDump(int signal) {
+	void *array[25];
+	int size;
+
+	size = backtrace(array, 25);
+	
+	LOG(Log::CRIT, std::to_string(signal) + ": " +
+		std::string(*backtrace_symbols(array, size)));
+	
+	exit(1);
 }
 
 int main(int argc, const char * argv[])
 {
 	LOG(Log::INFO, "Starting Omniscript...");
+	
+	signal(SIGSEGV, stackDump);
+	signal(SIGABRT, stackDump);
+
 	pid_t pid, sid;
 		
 	pid = fork();
@@ -95,21 +114,21 @@ int main(int argc, const char * argv[])
 	std::vector<std::shared_ptr<script::Script> > programs;
 	
 	auto inPrograms = [&](std::shared_ptr<script::Script> prog) {
-		return res->getUInt("id") == prog->id(); };
+		return res->getUInt("programid") == prog->id(); };
 	
 	while (true) {
-		res = DB_READ("SELECT * FROM `programs`");
+		res = DB_READ("SELECT * FROM `program`");
 		while (res->next()) {
 			std::vector<std::shared_ptr<script::Script> >::iterator it =
 					std::find_if(programs.begin(), programs.end(), inPrograms);
 			if (it == programs.end()) {
 				programs.push_back(std::make_shared<script::Script> (
 													res->getString("name"),
-													res->getUInt("id"),
-													res->getString("last_modified"),
+													res->getUInt("programid"),
+													res->getString("datemodified"),
 													res->getBlob("data"),
 													res->getBoolean("enabled")));
-			} else if ((*it)->updated(res->getString("last_modified"))){
+			} else if ((*it)->updated(res->getString("datemodified"))){
 				(*it)->name(res->getString("name"));
 				(*it)->updateScript(res->getBlob("data"));
 				res->getBoolean("enabled") ? (*it)->enable() : (*it)->disable();
@@ -130,7 +149,7 @@ int main(int argc, const char * argv[])
 		for (auto prog : programs) {
 			process(*prog);
 		}
-		sleep(30);
+		sleep(5);
 	}
 	
 	exit(EXIT_SUCCESS);

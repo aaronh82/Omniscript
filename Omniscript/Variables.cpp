@@ -11,6 +11,10 @@
 #include "Interpreter.h"
 
 #include <algorithm>
+#include <cmath>
+#include <thread>
+#include <chrono>
+#include <unistd.h>
 
 namespace interp {
 #pragma mark Variable defs
@@ -37,22 +41,37 @@ namespace interp {
 	
 #pragma mark Point defs
 	// Point defs
-	Point::Point(std::string name, std::string type, float val, uint point_id, uint type_id, uint device_id, uint path_id):
-		Variable(name, type, val), point_id_(point_id), type_id_(type_id), device_id_(device_id), path_id_(path_id) {}
+	Point::Point(const std::string &name, const std::string &type, float val, unsigned int type_id, unsigned int device_id, const std::string &device_name, unsigned int path_id):
+		Variable(name, type, val), type_id_(type_id), device_id_(device_id), device_name_(device_name), path_id_(path_id) {
+			std::string cmd = "SELECT point.pointid "
+							  "FROM point "
+							  "INNER JOIN device "
+							  "ON point.deviceid=device.deviceid "
+							  "WHERE device.name='" + device_name + "' "
+							  "AND point.name='" + name + "'";
+			std::shared_ptr<sql::ResultSet> res(DB_READ(cmd));
+			if (res->next()) {
+				point_id_ = res->getInt("pointid");
+			}
+		}
 	
-	uint Point::pointId() {
+	unsigned int Point::pointId() {
 		return point_id_;
 	}
 	
-	uint Point::typeId() {
+	unsigned int Point::typeId() {
 		return type_id_;
 	}
 	
-	uint Point::deviceId() {
+	unsigned int Point::deviceId() {
 		return device_id_;
 	}
 	
-	uint Point::pathId() {
+	std::string Point::deviceName() {
+		return device_name_;
+	}
+	
+	unsigned int Point::pathId() {
 		return path_id_;
 	}
 	
@@ -60,21 +79,21 @@ namespace interp {
 	// Variable Functors
 	float readVariable::operator()(const block_ptr &b, Interpreter &interp) {
 		const std::vector<std::shared_ptr<Variable> >::const_iterator var = std::find_if(interp.variables().begin(), interp.variables().end(), findVariable(b->args()[0]));
-		LOG(Log::DEBUGGING, "readVariable: " + std::to_string((*var)->value()));
-		return (*var)->value();
+		LOG(Log::DEBUGGING, "readVariable: " + std::to_string(round((*var)->value())));
+		return round((*var)->value());
 	}
 	
 	void setVar::operator()(const block_ptr &b, Interpreter &interp) {
-		const std::vector<std::shared_ptr<Variable> >::iterator var = std::find_if(interp.variables().begin(), interp.variables().end(), findVariable(b->args()[0]));
+		const std::vector<std::shared_ptr<Variable> >::const_iterator var = std::find_if(interp.variables().begin(), interp.variables().end(), findVariable(b->args()[0]));
 		float x = (b->args()[1].find("block:") != std::string::npos) ?
 					interp.execute(b->blockArgs()[stoi(b->args()[1].substr(b->args()[1].find(":") + 1))]) :
 					stof(b->args()[1]);
 		(*var)->value(x);
-		LOG(Log::DEBUGGING, "setVar");
+//		LOG(Log::DEBUGGING, "setVar");
 	}
 	
 	void changeVar::operator()(const block_ptr &b, Interpreter &interp) {
-		const std::vector<std::shared_ptr<Variable> >::iterator var = std::find_if(interp.variables().begin(), interp.variables().end(), findVariable(b->args()[0]));
+		const std::vector<std::shared_ptr<Variable> >::const_iterator var = std::find_if(interp.variables().begin(), interp.variables().end(), findVariable(b->args()[0]));
 		float x = (b->args()[1].find("block:") != std::string::npos) ?
 					interp.execute(b->blockArgs()[stoi(b->args()[1].substr(b->args()[1].find(":") + 1))]) :
 					stof(b->args()[1]);
@@ -84,29 +103,51 @@ namespace interp {
 	
 #pragma mark Point Functors
 	// Point Functors
+	float readPnt(std::string dName, std::string pName) {
+		const std::string query = "SELECT point.val "
+								  "FROM point "
+								  "INNER JOIN device "
+								  "ON point.deviceid=device.deviceid "
+								  "WHERE device.name='" + dName + "'"
+								  "AND point.name='" + pName + "'";
+		try {
+			std::shared_ptr<sql::ResultSet> res = DB_READ(query);
+			if (res->next()) {
+				LOG(Log::DEBUGGING, "readPoint: " +
+					std::to_string(res->getDouble("val")));
+				return res->getDouble("val");
+			}
+		} catch (sql::SQLException e) {
+			return readPnt(dName, pName);
+		}
+	}
+	
 	float readPoint::operator()(const block_ptr &b, Interpreter &interp) {
 		const std::vector<std::shared_ptr<Point> >::const_iterator point = std::find_if(interp.points().begin(), interp.points().end(), findVariable(b->args()[0]));
-		const std::string query = "SELECT val FROM point WHERE pointid='" + std::to_string((*point)->pointId()) + "'";
-		std::shared_ptr<sql::ResultSet> res = DB_READ(query);
-		LOG(Log::DEBUGGING, "readPoint: " + std::to_string(res->getDouble("val")));
-		return res->getDouble("val");
+		return readPnt((*point)->deviceName(), (*point)->name());
 	}
 	
 	void setPoint::operator()(const block_ptr &b, Interpreter &interp) {
-		std::vector<std::shared_ptr<Point> >::iterator point = std::find_if(interp.points().begin(), interp.points().end(), findVariable(b->args()[1]));
+		std::vector<std::shared_ptr<Point> > points = interp.points();
+		std::vector<std::shared_ptr<Point> >::const_iterator point = std::find_if(points.begin(), points.end(), findVariable(b->args()[0]));
 		float x = (b->args()[1].find("block:") != std::string::npos) ?
 					interp.execute(b->blockArgs()[stoi(b->args()[1].substr(b->args()[1].find(":") + 1))]) :
 					stof(b->args()[1]);
-		writePointValue(x, point);
+		float cmp = readPnt((*point)->deviceName(), (*point)->name());
+		if (fabsf(x - cmp) > 0.01 && int(x) != int(cmp)) {
+			writePointValue(x, point);
+			sleep(1);
+		}
 		LOG(Log::DEBUGGING, "setPoint");
 	}
 	
 	void changePoint::operator()(const block_ptr &b, Interpreter &interp) {
-		std::vector<std::shared_ptr<Point> >::iterator point = std::find_if(interp.points().begin(), interp.points().end(), findVariable(b->args()[1]));
+		std::vector<std::shared_ptr<Point> >::const_iterator point = std::find_if(interp.points().begin(), interp.points().end(), findVariable(b->args()[0]));
 		float x = (b->args()[1].find("block:") != std::string::npos) ?
 					interp.execute(b->blockArgs()[stoi(b->args()[1].substr(b->args()[1].find(":") + 1))]) :
 					stof(b->args()[1]);
-		writePointValue(x, point);
+		writePointValue(x + readPnt((*point)->deviceName(), (*point)->name()), point);
+		sleep(1);
 		LOG(Log::DEBUGGING, "changePoint");
 	}
 	
@@ -116,7 +157,11 @@ namespace interp {
 		return var->name().compare(name_) == 0;
 	}
 	
-	void writePointValue(const float &x, std::vector<std::shared_ptr<Point> >::iterator p) {
-		DB_WRITE("INSERT INTO command_queue (pointid, val, issued_ts) VALUES ('" + std::to_string((*p)->pointId()) + "', '" + std::to_string(x) + "', NOW())");
+	void writePointValue(const float &x, std::vector<std::shared_ptr<Point> >::const_iterator p) {
+		DB_WRITE("INSERT INTO commandqueue (commandqueuestatusid, name, pointid,"
+				 " priorityid, val, is_override, timeout, issued_userid, issued_ts)"
+				 " VALUES (1, 'Omniscript Command', '"
+				 + std::to_string((*p)->pointId()) + "', 0, '"
+				 + std::to_string(x) + "', 0, 180, 0, NOW())");
 	}
 }

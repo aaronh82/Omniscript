@@ -12,6 +12,7 @@
 #include "Logger.h"
 #include "Block.h"
 #include "BaseFunctor.h"
+#include "Device.h"
 
 #include <memory>
 #include <vector>
@@ -35,19 +36,25 @@ namespace interp {
 	};
 	
 	class Point : public Variable {
+		typedef std::shared_ptr<Device> dev_ptr;
+		
 		unsigned int point_id_;
 		unsigned int type_id_;
-		unsigned int device_id_;
-		std::string device_name_;
-		unsigned int path_id_;
+		dev_ptr device_;
+		int unwritten_count_;
+
 	public:
-		Point(const std::string&, const std::string&, float, unsigned int, unsigned int, const std::string&, unsigned int);
+		Point(const std::string&, const std::string&, float, unsigned int, dev_ptr);
 		
 		unsigned int pointId();
 		unsigned int typeId();
+		const dev_ptr device();
 		unsigned int deviceId();
 		std::string deviceName();
 		unsigned int pathId();
+		int unwritten_count();
+		void inc_unwritten();
+		void reset_unwritten();
 	};
 	
 	class readVariable: public FloatFunctor {

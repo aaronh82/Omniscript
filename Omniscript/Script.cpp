@@ -97,12 +97,16 @@ namespace script {
 		return id_;
 	}
 	
-	const std::vector<std::shared_ptr<interp::Variable> >& Script::variables() const {
+	const std::vector<var_ptr>& Script::variables() {
 		return variables_;
 	}
 	
-	const std::vector<std::shared_ptr<interp::Point> >& Script::points() const {
+	const std::vector<point_ptr>& Script::points() {
 		return points_;
+	}
+	
+	std::vector<dev_ptr>& Script::devices() {
+		return devices_;
 	}
 	
 	void Script::enable() {

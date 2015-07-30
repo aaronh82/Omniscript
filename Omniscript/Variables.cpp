@@ -9,12 +9,12 @@
 #include "Variables.h"
 #include "DBConnection.h"
 #include "Interpreter.h"
+#include "Device.h"
 
 #include <algorithm>
 #include <cmath>
 #include <thread>
 #include <chrono>
-#include <unistd.h>
 
 namespace interp {
 #pragma mark Variable defs
@@ -41,13 +41,14 @@ namespace interp {
 	
 #pragma mark Point defs
 	// Point defs
-	Point::Point(const std::string &name, const std::string &type, float val, unsigned int type_id, unsigned int device_id, const std::string &device_name, unsigned int path_id):
-		Variable(name, type, val), type_id_(type_id), device_id_(device_id), device_name_(device_name), path_id_(path_id) {
+	Point::Point(const std::string &name, const std::string &type, float val, unsigned int type_id, dev_ptr device):
+		Variable(name, type, val), type_id_(type_id), device_(device), unwritten_count_(0) {
 			std::string cmd = "SELECT point.pointid "
 							  "FROM point "
 							  "INNER JOIN device "
 							  "ON point.deviceid=device.deviceid "
-							  "WHERE device.name='" + device_name + "' "
+							  "WHERE device.deviceid='" +
+									std::to_string(device_->id()) + "' "
 							  "AND point.name='" + name + "'";
 			std::shared_ptr<sql::ResultSet> res(DB_READ(cmd));
 			if (res->next()) {
@@ -62,17 +63,33 @@ namespace interp {
 	unsigned int Point::typeId() {
 		return type_id_;
 	}
+
+	const Point::dev_ptr Point::device() {
+		return device_;
+	}
 	
 	unsigned int Point::deviceId() {
-		return device_id_;
+		return device_->id();
 	}
 	
 	std::string Point::deviceName() {
-		return device_name_;
+		return device_->name();
 	}
 	
 	unsigned int Point::pathId() {
-		return path_id_;
+		return device_->path();
+	}
+	
+	int Point::unwritten_count() {
+		return unwritten_count_;
+	}
+	
+	void Point::inc_unwritten() {
+		++unwritten_count_;
+	}
+	
+	void Point::reset_unwritten() {
+		unwritten_count_ = 0;
 	}
 	
 #pragma mark Variable Functors
@@ -134,9 +151,15 @@ namespace interp {
 					interp.execute(b->blockArgs()[stoi(b->args()[1].substr(b->args()[1].find(":") + 1))]) :
 					stof(b->args()[1]);
 		float cmp = readPnt((*point)->deviceName(), (*point)->name());
-		if (fabsf(x - cmp) > 0.01 && int(x) != int(cmp)) {
-			writePointValue(x, point);
-			sleep(1);
+		if (!(*point)->device()->isOffline()) {
+			if ((fabsf(x - cmp) > 0.001 || (*point)->unwritten_count() == 100) ||
+				(*point)->device()->prevState() == DeviceStatus::Offline) {
+				writePointValue(x, point);
+				(*point)->reset_unwritten();
+				(*point)->device()->prevState(DeviceStatus::Online);
+			} else {
+				(*point)->inc_unwritten();
+			}
 		}
 		LOG(Log::DEBUGGING, "setPoint");
 	}
@@ -147,7 +170,6 @@ namespace interp {
 					interp.execute(b->blockArgs()[stoi(b->args()[1].substr(b->args()[1].find(":") + 1))]) :
 					stof(b->args()[1]);
 		writePointValue(x + readPnt((*point)->deviceName(), (*point)->name()), point);
-		sleep(1);
 		LOG(Log::DEBUGGING, "changePoint");
 	}
 	

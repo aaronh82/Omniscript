@@ -64,7 +64,7 @@ namespace interp {
 	bool Alarm::write() {
 		bool success = false;
 		if (!written_) {
-			const std::string query = "INSERT INTO alarm (alarmkey, "
+			const std::string query = "INSERT INTO alarminstance (alarmkey, "
 			"alarmtypeid, "
 			"alarmstatusid, "
 			"alarmlevelid, "
@@ -101,7 +101,7 @@ namespace interp {
 	bool PointAlarm::write() {
 		bool success = false;
 		if (!written_) {
-			const std::string query = "INSERT INTO alarm (alarmkey, "
+			const std::string query = "INSERT INTO alarminstance (alarmkey, "
 			"alarmtypeid, "
 			"alarmstatusid, "
 			"alarmlevelid, "

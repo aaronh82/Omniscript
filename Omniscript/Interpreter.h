@@ -29,6 +29,9 @@ namespace script {
 }
 
 namespace interp {
+	typedef std::shared_ptr<interp::Variable> var_ptr;
+	typedef std::shared_ptr<interp::Point> point_ptr;
+	typedef std::shared_ptr<interp::Device> dev_ptr;
 
 	class Interpreter {
 		typedef std::map<std::string, std::shared_ptr<BaseFunctor> > func_map;
@@ -43,8 +46,9 @@ namespace interp {
 		
 		void start();
 		float execute(const block_ptr&);
-		const std::vector<std::shared_ptr<Variable> >& variables();
-		const std::vector<std::shared_ptr<Point> >& points();
+		const std::vector<var_ptr>& variables();
+		const std::vector<point_ptr>& points();
+		const std::vector<dev_ptr>& devices();
 	};
 	
 }

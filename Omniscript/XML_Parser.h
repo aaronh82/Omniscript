@@ -48,7 +48,8 @@ namespace util {
 	public:
 		static std::map<int, block_ptr> build(std::istream*, script::Script&);
 		static void getVars(std::vector<std::shared_ptr<interp::Variable> >&);
-		static void getPoints(std::vector<std::shared_ptr<interp::Point> >&);
+		static void getPoints(std::vector<std::shared_ptr<interp::Point> >&,
+							  std::vector<std::shared_ptr<interp::Device> >&);
 	};
 }
 

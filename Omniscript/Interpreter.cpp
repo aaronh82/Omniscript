@@ -14,6 +14,8 @@
 #include "Variables.h"
 #include "Alarms.h"
 #include "Logger.h"
+#include "DBConnection.h"
+#include "Device.h"
 
 #include <chrono>
 #include <unistd.h>
@@ -109,6 +111,27 @@ namespace interp {
 				}
 				
 			}
+			
+			for (auto& device: program_.devices()) {
+				std::shared_ptr<sql::ResultSet> res =
+				DB_READ("SELECT devicestatus.name "
+						"FROM `devicestatus` "
+						"INNER JOIN `device` "
+						"ON device.devicestatusid=devicestatus.devicestatusid "
+						"WHERE device.deviceid='" + std::to_string(device->id()) + "'");
+				if (res->next()) {
+					std::string state = res->getString("name");
+					device->prevState(device->state());
+					if (state == "Offline")
+						device->state(DeviceStatus::Offline);
+					else if (state == "Online")
+						device->state(DeviceStatus::Online);
+					else if (state == "Error")
+						device->state(DeviceStatus::Error);
+					else if (state == "Deleted")
+						device->state(DeviceStatus::Deleted);
+				}
+			}
 			sleep(5);
 //			std::this_thread::sleep_for(std::chrono::milliseconds(20));
 		}
@@ -142,12 +165,16 @@ namespace interp {
 		return 0;
 	}
 	
-	const std::vector<std::shared_ptr<Variable> >& Interpreter::variables() {
+	const std::vector<var_ptr>& Interpreter::variables() {
 		return program_.variables();
 	}
 	
-	const std::vector<std::shared_ptr<Point> >& Interpreter::points() {
+	const std::vector<point_ptr>& Interpreter::points() {
 		return program_.points();
+	}
+	
+	const std::vector<dev_ptr>& Interpreter::devices() {
+		return program_.devices();
 	}
 	
 }

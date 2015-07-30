@@ -11,6 +11,7 @@
 
 #include <thread>
 #include <chrono>
+#include <unistd.h>
 
 namespace conn {
 /*
@@ -97,6 +98,7 @@ namespace conn {
 		sqlRes res;
 		try {
 			res = execute(query);
+			std::this_thread::sleep_for(std::chrono::milliseconds(200));
 		} catch (sql::SQLException e) {
 			LOG(Log::WARN, "Database read failed: " + std::string(e.what()));
 			if (e.getErrorCode() == 2006 && conn_->isClosed()) {
@@ -122,6 +124,7 @@ namespace conn {
 		std::lock_guard<std::mutex> lock(mut_);
 		try {
 			execute(query);
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		} catch (sql::SQLException e) {
 //			LOG(Log::WARN, "Failed to execute query: " + query + ": " + e.what());
 			if (e.getErrorCode() == 2006 && conn_->isClosed()) {

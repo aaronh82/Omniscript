@@ -33,7 +33,7 @@ namespace util {
 		parse(is);
 		node_ptr scriptRoot(root->first_node("scripts")->first_node("script"), null_deleter());
 		getVars(script.variables_);
-		getPoints(script.points_);
+		getPoints(script.points_, script.devices_);
 		std::map<int, block_ptr> startingBlocks;
 		
 		for (int i = 0; scriptRoot; scriptRoot.reset(scriptRoot->next_sibling(), null_deleter()), ++i) {
@@ -150,7 +150,8 @@ namespace util {
 		}
 	}
 	
-	void XML::getPoints(std::vector<std::shared_ptr<interp::Point> > &points) {
+	void XML::getPoints(std::vector<std::shared_ptr<interp::Point> > &points,
+						std::vector<std::shared_ptr<interp::Device> >& devs) {
 		const rapidxml::xml_node<> *devices(root->first_node("devices"));
 		if (devices) {
 			for (rapidxml::xml_node<> *device(devices->first_node());
@@ -159,6 +160,7 @@ namespace util {
 				unsigned int id = std::atof(device->first_attribute("device_id")->value());
 				const std::string name = device->first_attribute("name")->value();
 				unsigned int path = std::atof(device->first_attribute("path_id")->value());
+				devs.emplace_back(std::make_shared<interp::Device>(name, id, path));
 				const rapidxml::xml_node<> *pointRoot(device->first_node("points"));
 				for (rapidxml::xml_node<> *point(pointRoot->first_node());
 					 point;
@@ -168,9 +170,7 @@ namespace util {
 									point->first_attribute("type")->value(),
 									std::atof(point->first_node("l")->value()),
 									std::atof(point->first_attribute("type_id")->value()),
-									id,
-									name,
-									path));
+									devs.back()));
 				}
 			}
 		}

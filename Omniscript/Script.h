@@ -16,16 +16,21 @@
 #include <memory>
 
 #include "Block.h"
+#include "Device.h"
 #include "Variables.h"
 #include "XML_Parser.h"
 
 using block_ptr = blocks::Block::block_ptr;
+
 
 namespace util {
 	class XML;
 }
 
 namespace script {
+	typedef std::shared_ptr<interp::Variable> var_ptr;
+	typedef std::shared_ptr<interp::Point> point_ptr;
+	typedef std::shared_ptr<interp::Device> dev_ptr;
 	
 	class Script {
 		friend class util::XML;
@@ -37,9 +42,9 @@ namespace script {
 		bool enabled_;
 		bool restart_;
 		
-		std::vector<std::shared_ptr<interp::Variable> > variables_;
-		std::vector<std::shared_ptr<interp::Point> > points_;
-		
+		std::vector<var_ptr> variables_;
+		std::vector<point_ptr> points_;
+		std::vector<dev_ptr> devices_;
 		
 		std::time_t convertTime(std::string);
 		std::string getDate(std::string);
@@ -58,8 +63,9 @@ namespace script {
 		std::string name() const;
 		unsigned int id();
 		unsigned int id() const;
-		const std::vector<std::shared_ptr<interp::Variable> >& variables() const;
-		const std::vector<std::shared_ptr<interp::Point> >& points() const;
+		const std::vector<var_ptr>& variables();
+		const std::vector<point_ptr>& points();
+		std::vector<dev_ptr>& devices();
 		void enable();
 		void disable();
 		bool isEnabled();

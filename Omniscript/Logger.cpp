@@ -29,7 +29,7 @@ namespace Log {
 		layout->setConversionPattern("%d{%Y-%m-%d %H:%M:%S} [%p] %c: %m%n");
 		p_appender->setLayout(layout);
 		
-		m_cpp_logger.setPriority(log4cpp::Priority::DEBUG);
+		m_cpp_logger.setPriority(log4cpp::Priority::INFO);
 		m_cpp_logger.addAppender(p_appender);
 	}
 	

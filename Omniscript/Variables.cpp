@@ -14,13 +14,13 @@
 #include <algorithm>
 #include <cmath>
 #include <thread>
-#include <chrono>
 
 namespace interp {
 #pragma mark Variable defs
 	// Variable defs
 	Variable::Variable(std::string name, std::string type, float val):
-		name_(name), type_(type), value_(val) {}
+		name_(name), type_(type), value_(val), prevValue_(val),
+		lastCOV_(std::chrono::system_clock::now()) {}
 	
 	std::string Variable::name() {
 		return name_;
@@ -36,7 +36,16 @@ namespace interp {
 	
 	float Variable::value(const float &f) {
 		value_ = f;
+		lastCOV_ = std::chrono::system_clock::now();
 		return value_;
+	}
+	
+	float Variable::prevValue() {
+		return prevValue_;
+	}
+	
+	std::chrono::system_clock::time_point Variable::lastCOV() {
+		return lastCOV_;
 	}
 	
 #pragma mark Point defs

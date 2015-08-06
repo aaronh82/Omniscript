@@ -17,6 +17,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <chrono>
 
 using block_ptr = blocks::Block::block_ptr;
 
@@ -26,6 +27,9 @@ namespace interp {
 		std::string name_;
 		std::string type_;
 		float value_;
+		float prevValue_;
+		std::chrono::system_clock::time_point lastCOV_;
+		
 	public:
 		Variable(std::string, std::string, float);
 		
@@ -33,6 +37,8 @@ namespace interp {
 		std::string type();
 		float value();
 		float value(const float&);
+		float prevValue();
+		std::chrono::system_clock::time_point lastCOV();
 	};
 	
 	class Point : public Variable {

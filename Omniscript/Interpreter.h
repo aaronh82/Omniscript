@@ -21,6 +21,15 @@
 #include "Script.h"
 #include "BaseFunctor.h"
 #include "Variables.h"
+#include "Triggers.h"
+#include "Logic.h"
+#include "Operators.h"
+#include "HVAC.h"
+#include "Variables.h"
+#include "Alarms.h"
+#include "Logger.h"
+#include "DBConnection.h"
+#include "Device.h"
 
 using block_ptr = blocks::Block::block_ptr;
 

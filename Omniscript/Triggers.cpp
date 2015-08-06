@@ -9,7 +9,6 @@
 #include "Triggers.h"
 #include "DBConnection.h"
 #include "Interpreter.h"
-#include "api.h"
 
 #include <mutex>
 #include <condition_variable>
@@ -30,13 +29,33 @@ namespace interp {
 	std::atomic<bool> ready(false);
 	std::atomic<bool> running(false);
 	
+	
+	bool exec(const std::string& cmd) {
+		FILE *pipe = popen(cmd.c_str(), "r");
+		if (!pipe) {
+			LOG(Log::ERROR, "Failed to execute '" + std::string(cmd) + "'");
+		}
+		char buffer[128];
+		std::string res = "";
+		while (!feof(pipe)) {
+			if (fgets(buffer, 128, pipe) != NULL) {
+				res += buffer;
+			}
+		}
+		pclose(pipe);
+		
+		if (res.find("YES") != std::string::npos) {
+			return true;
+		}
+		return false;
+	}
 		
 	bool getSchedStatus(const std::string& name) {
 		std::string cmd("/usr/bin/php -f "
 						"/var/www/maverick/app/public_htdocs/api.php "
 						"target=schedule action=get_status "
 						"name=" + name + " output=text");
-		return api::exec(cmd) == "YES";
+		return exec(cmd);
 	}
 	
 	void whenOn::operator()(const block_ptr &b, Interpreter &interp) {

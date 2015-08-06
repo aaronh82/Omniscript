@@ -7,15 +7,6 @@
 //
 
 #include "Interpreter.h"
-#include "Triggers.h"
-#include "Logic.h"
-#include "Operators.h"
-#include "HVAC.h"
-#include "Variables.h"
-#include "Alarms.h"
-#include "Logger.h"
-#include "DBConnection.h"
-#include "Device.h"
 
 #include <chrono>
 #include <unistd.h>
@@ -84,8 +75,10 @@ namespace interp {
 		primTable["doChangePoint"]			= std::make_shared<changePoint>();
 		
 		// Alarms
-		primTable["highTemp"]				= std::make_shared<highTempLimit>();
-		primTable["lowTemp"]				= std::make_shared<lowTempLimit>();
+		primTable["highLimit"]				= std::make_shared<highLimit>();
+		primTable["lowLimit"]				= std::make_shared<lowLimit>();
+		primTable["runtimeLimit"]			= std::make_shared<runtimeLimit>();
+		primTable["statusAlarm"]			= std::make_shared<statusAlarm>();
 		primTable["customAlarm"]			= std::make_shared<customAlarm>();
 	}
 	

@@ -17,15 +17,27 @@ using block_ptr = blocks::Block::block_ptr;
 
 namespace interp {
 	
-	class highTempLimit: public VoidFunctor {
+	class highLimit: public VoidFunctor {
 	public:
-		highTempLimit(){}
+		highLimit(){}
 		void operator()(const block_ptr&, Interpreter&);
 	};
 	
-	class lowTempLimit: public VoidFunctor {
+	class lowLimit: public VoidFunctor {
 	public:
-		lowTempLimit(){}
+		lowLimit(){}
+		void operator()(const block_ptr&, Interpreter&);
+	};
+	
+	class runtimeLimit: public VoidFunctor {
+	public:
+		runtimeLimit(){}
+		void operator()(const block_ptr&, Interpreter&);
+	};
+	
+	class statusAlarm: public VoidFunctor {
+	public:
+		statusAlarm(){}
 		void operator()(const block_ptr&, Interpreter&);
 	};
 	

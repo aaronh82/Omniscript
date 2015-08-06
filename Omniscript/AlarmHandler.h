@@ -21,18 +21,20 @@ namespace interp {
 	
 	class Alarm {
 	protected:
-		std::string key_;
-		const std::string type_;
+		const std::string key_;
+		const std::string level_;
 		const std::string name_;
 		const std::string description_;
 		std::time_t date_created_;
-		bool written_;
 		
 	public:
-		Alarm(const std::string&, const std::string&, const std::string&);
+		Alarm(const std::string&, const std::string&, const std::string&, const std::string&);
 		
-		virtual bool write();
-		std::string key();
+		virtual const std::string& id() { return key_; }
+		virtual const std::string& name() { return name_; }
+		virtual const std::string& description() { return description_; }
+		virtual const std::string& level() { return level_; }
+		virtual bool write(const std::string&);
 		friend bool operator==(const Alarm&, const Alarm&);
 	};
 	
@@ -40,9 +42,9 @@ namespace interp {
 		Point point_;
 		
 	public:
-		PointAlarm(const std::string&, const std::string&, const std::string&, const Point&);
+		PointAlarm(const std::string&, const std::string&, const std::string&, const std::string&, const Point&);
 		
-		bool write();
+		bool write(const std::string&);
 		friend bool operator==(const Alarm&, const Alarm&);
 	};
 	
@@ -59,6 +61,7 @@ namespace interp {
 	public:
 		static AlarmHandler& getHandler();
 		void add(std::shared_ptr<Alarm>);
+		void clear(const std::string&);
 		void cleanUp();
 	};
 	

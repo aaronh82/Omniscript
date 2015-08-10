@@ -21,60 +21,12 @@ namespace script {
 			lastModified_ = curTime;
 		}
 	}
-	
-	std::time_t Script::convertTime(std::string sql_time) {
-		std::string date = getDate(sql_time);
-		std::string time = getTime(sql_time);
-		
-		std::unique_ptr<tm> time_info(new tm);
-		
-		time_info->tm_year = getYear(date);
-		time_info->tm_mon = getMonth(date);
-		time_info->tm_mday = getDay(date);
-		time_info->tm_hour = getHours(time);
-		time_info->tm_min = getMinutes(time);
-		time_info->tm_sec = getSeconds(time);
-		time_info->tm_isdst = 0;
-		
-		return mktime(time_info.get());
-	}
-	
-	std::string Script::getDate(std::string s) {
-		return s.substr(0, s.find(" "));
-	}
-	
-	std::string Script::getTime(std::string s) {
-		return s.substr(s.rfind(" ") + 1);
-	}
-	
-	int Script::getYear(std::string s) {
-		return std::stoi(s.substr(0, s.find("-"))) - 1900;
-	}
-	
-	int Script::getMonth(std::string s) {
-		size_t start = s.find("-") + 1;
-		return std::stoi(s.substr(start, s.find("-", start) - start)) - 1;
-	}
-	
-	int Script::getDay(std::string s) {
-		size_t first = s.find("-") + 1;
-		size_t start = s.find("-", first) + 1;
-		return std::stoi(s.substr(start, s.find("-", start)));
-	}
-	
-	int Script::getHours(std::string s) {
-		return std::stoi(s.substr(0, s.find(":")));
-	}
-	
-	int Script::getMinutes(std::string s) {
-		size_t start = s.find(":") + 1;
-		return std::stoi(s.substr(start, s.find(":", start) - start));
-	}
-	
-	int Script::getSeconds(std::string s) {
-		size_t first = s.find(":") + 1;
-		size_t start = s.find(":", first) + 1;
-		return std::stoi(s.substr(start, s.find(":", start)));
+
+	std::time_t Script::convertTime(const std::string& sql_time) {
+		struct tm time_info;
+		strptime(sql_time.c_str(), "%Y-%m-%d %H:%M:%S", &time_info);
+		time_info.tm_isdst = -1;
+		return mktime(&time_info);
 	}
 	
 	// Public

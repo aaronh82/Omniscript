@@ -40,6 +40,12 @@ namespace interp {
 		statusAlarm(){}
 		void operator()(const block_ptr&, Interpreter&);
 	};
+
+	class staleValueAlarm : public VoidFunctor {
+	public:
+		staleValueAlarm(){}
+		void operator()(const block_ptr&, Interpreter&);
+	};
 	
 	class customAlarm: public VoidFunctor {
 	public:

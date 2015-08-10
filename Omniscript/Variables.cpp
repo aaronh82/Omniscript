@@ -20,7 +20,7 @@ namespace interp {
 	// Variable defs
 	Variable::Variable(std::string name, std::string type, float val):
 		name_(name), type_(type), value_(val), prevValue_(val),
-		lastCOV_(std::chrono::system_clock::now()) {}
+		cov_timestamp_(std::time(nullptr)) {}
 	
 	std::string Variable::name() {
 		return name_;
@@ -34,18 +34,25 @@ namespace interp {
 		return value_;
 	}
 	
-	float Variable::value(const float &f) {
+	void Variable::value(const float f) {
+		if (prevValue_ != value_) prevValue_ = value_;
 		value_ = f;
-		lastCOV_ = std::chrono::system_clock::now();
-		return value_;
 	}
 	
 	float Variable::prevValue() {
 		return prevValue_;
 	}
+
+	void Variable::prevValue(const float f) {
+		prevValue_ = f;
+	}
 	
-	std::chrono::system_clock::time_point Variable::lastCOV() {
-		return lastCOV_;
+	std::time_t Variable::lastCOV() {
+		return cov_timestamp_;
+	}
+
+	void Variable::updateCOV(std::time_t t) {
+		cov_timestamp_ = t;
 	}
 	
 #pragma mark Point defs
@@ -89,16 +96,24 @@ namespace interp {
 		return device_->path();
 	}
 	
-	int Point::unwritten_count() {
+	int Point::unwrittenCount() {
 		return unwritten_count_;
 	}
 	
-	void Point::inc_unwritten() {
+	void Point::incUnwritten() {
 		++unwritten_count_;
 	}
 	
-	void Point::reset_unwritten() {
+	void Point::resetUnwritten() {
 		unwritten_count_ = 0;
+	}
+
+	std::time_t Point::lastPoll() {
+		return poll_timestamp_;
+	}
+
+	void Point::updatePollTimestamp(std::time_t t) {
+		poll_timestamp_ = t;
 	}
 	
 #pragma mark Variable Functors
@@ -129,28 +144,38 @@ namespace interp {
 	
 #pragma mark Point Functors
 	// Point Functors
-	float readPnt(std::string dName, std::string pName) {
-		const std::string query = "SELECT point.val "
+	time_t convertTime(const std::string& sql_time) {
+		struct tm time_info;
+		strptime(sql_time.c_str(), "%Y-%m-%d %H:%M:%S", &time_info);
+		time_info.tm_isdst = -1;
+		return mktime(&time_info);
+	}
+	void readPnt(Point& p) {
+		const std::string query = "SELECT point.val, point.prevval, point.poll_timestamp, point.cov_timestamp "
 								  "FROM point "
 								  "INNER JOIN device "
 								  "ON point.deviceid=device.deviceid "
-								  "WHERE device.name='" + dName + "'"
-								  "AND point.name='" + pName + "'";
+								  "WHERE device.name='" + p.deviceName() + "'"
+								  "AND point.name='" + p.name() + "'";
 		try {
 			std::shared_ptr<sql::ResultSet> res = DB_READ(query);
 			if (res->next()) {
 				LOG(Log::DEBUGGING, "readPoint: " +
 					std::to_string(res->getDouble("val")));
-				return res->getDouble("val");
+				p.value(res->getDouble("val"));
+				p.prevValue(res->getDouble("prevval"));
+				p.updatePollTimestamp(convertTime(res->getString("poll_timestamp")));
+				p.updateCOV(convertTime(res->getString("cov_timestamp")));
 			}
 		} catch (sql::SQLException e) {
-			return readPnt(dName, pName);
+			readPnt(p);
 		}
 	}
 	
 	float readPoint::operator()(const block_ptr &b, Interpreter &interp) {
 		const std::vector<std::shared_ptr<Point> >::const_iterator point = std::find_if(interp.points().begin(), interp.points().end(), findVariable(b->args()[0]));
-		return readPnt((*point)->deviceName(), (*point)->name());
+		readPnt(**point);
+		return (*point)->value();
 	}
 	
 	void setPoint::operator()(const block_ptr &b, Interpreter &interp) {
@@ -159,15 +184,15 @@ namespace interp {
 		float x = (b->args()[1].find("block:") != std::string::npos) ?
 					interp.execute(b->blockArgs()[stoi(b->args()[1].substr(b->args()[1].find(":") + 1))]) :
 					stof(b->args()[1]);
-		float cmp = readPnt((*point)->deviceName(), (*point)->name());
+		readPnt(**point);
 		if (!(*point)->device()->isOffline()) {
-			if ((fabsf(x - cmp) > 0.001 || (*point)->unwritten_count() == 100) ||
+			if ((fabsf(x - (*point)->value()) > 0.001 || (*point)->unwrittenCount() == 100) ||
 				(*point)->device()->prevState() == DeviceStatus::Offline) {
 				writePointValue(x, point);
-				(*point)->reset_unwritten();
+				(*point)->resetUnwritten();
 				(*point)->device()->prevState(DeviceStatus::Online);
 			} else {
-				(*point)->inc_unwritten();
+				(*point)->incUnwritten();
 			}
 		}
 		LOG(Log::DEBUGGING, "setPoint");
@@ -178,7 +203,8 @@ namespace interp {
 		float x = (b->args()[1].find("block:") != std::string::npos) ?
 					interp.execute(b->blockArgs()[stoi(b->args()[1].substr(b->args()[1].find(":") + 1))]) :
 					stof(b->args()[1]);
-		writePointValue(x + readPnt((*point)->deviceName(), (*point)->name()), point);
+		readPnt(**point);
+		writePointValue(x + (*point)->value(), point);
 		LOG(Log::DEBUGGING, "changePoint");
 	}
 	

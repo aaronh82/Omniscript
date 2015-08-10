@@ -17,7 +17,7 @@
 #include <memory>
 #include <vector>
 #include <string>
-#include <chrono>
+#include <ctime>
 
 using block_ptr = blocks::Block::block_ptr;
 
@@ -28,7 +28,7 @@ namespace interp {
 		std::string type_;
 		float value_;
 		float prevValue_;
-		std::chrono::system_clock::time_point lastCOV_;
+		std::time_t cov_timestamp_;
 		
 	public:
 		Variable(std::string, std::string, float);
@@ -36,9 +36,11 @@ namespace interp {
 		std::string name();
 		std::string type();
 		float value();
-		float value(const float&);
+		void value(const float);
 		float prevValue();
-		std::chrono::system_clock::time_point lastCOV();
+		void prevValue(const float);
+		std::time_t lastCOV();
+		void updateCOV(std::time_t);
 	};
 	
 	class Point : public Variable {
@@ -48,6 +50,7 @@ namespace interp {
 		unsigned int type_id_;
 		dev_ptr device_;
 		int unwritten_count_;
+		std::time_t poll_timestamp_;
 
 	public:
 		Point(const std::string&, const std::string&, float, unsigned int, dev_ptr);
@@ -58,9 +61,11 @@ namespace interp {
 		unsigned int deviceId();
 		std::string deviceName();
 		unsigned int pathId();
-		int unwritten_count();
-		void inc_unwritten();
-		void reset_unwritten();
+		int unwrittenCount();
+		void incUnwritten();
+		void resetUnwritten();
+		std::time_t lastPoll();
+		void updatePollTimestamp(std::time_t);
 	};
 	
 	class readVariable: public FloatFunctor {

@@ -45,16 +45,8 @@ namespace script {
 		std::vector<var_ptr> variables_;
 		std::vector<point_ptr> points_;
 		std::vector<dev_ptr> devices_;
-		
-		std::time_t convertTime(std::string);
-		std::string getDate(std::string);
-		std::string getTime(std::string);
-		int getYear(std::string);
-		int getMonth(std::string);
-		int getDay(std::string);
-		int getHours(std::string);
-		int getMinutes(std::string);
-		int getSeconds(std::string);
+
+		std::time_t convertTime(const std::string&);
 		
 	public:
 		Script(std::string, unsigned int, std::string, std::istream*, bool);

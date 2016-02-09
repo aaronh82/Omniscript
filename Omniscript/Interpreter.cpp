@@ -76,7 +76,9 @@ namespace interp {
 		
 		// Alarms
 		primTable["highLimit"]				= std::make_shared<highLimit>();
+		primTable["highLimitDelay"]			= std::make_shared<highLimitDelay>();
 		primTable["lowLimit"]				= std::make_shared<lowLimit>();
+		primTable["lowLimitDelay"]			= std::make_shared<lowLimitDelay>();
 		primTable["runtimeLimit"]			= std::make_shared<runtimeLimit>();
 		primTable["statusAlarm"]			= std::make_shared<statusAlarm>();
 		primTable["customAlarm"]			= std::make_shared<customAlarm>();

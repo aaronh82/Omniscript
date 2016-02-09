@@ -12,6 +12,7 @@
 #include "Logger.h"
 #include "Block.h"
 #include "BaseFunctor.h"
+#include "Interpreter.h"
 
 using block_ptr = blocks::Block::block_ptr;
 
@@ -22,10 +23,22 @@ namespace interp {
 		highLimit(){}
 		void operator()(const block_ptr&, Interpreter&);
 	};
+
+	class highLimitDelay: public VoidFunctor {
+	public:
+		highLimitDelay(){}
+		void operator()(const block_ptr&, Interpreter&);
+	};
 	
 	class lowLimit: public VoidFunctor {
 	public:
 		lowLimit(){}
+		void operator()(const block_ptr&, Interpreter&);
+	};
+
+	class lowLimitDelay: public VoidFunctor {
+	public:
+		lowLimitDelay(){}
 		void operator()(const block_ptr&, Interpreter&);
 	};
 	
@@ -50,6 +63,12 @@ namespace interp {
 	class customAlarm: public VoidFunctor {
 	public:
 		customAlarm(){}
+		void operator()(const block_ptr&, Interpreter&);
+	};
+
+	class clearCustomAlarm: public VoidFunctor {
+	public:
+		clearCustomAlarm(){}
 		void operator()(const block_ptr&, Interpreter&);
 	};
 	

@@ -17,7 +17,8 @@ namespace blocks {
 		listBlocks_ = {};
 	}
 	
-	Block::Block(std::string opcode, block_ptr next): opcode_(opcode), next_(next) {
+	Block::Block(const std::string opcode, const block_ptr next):
+				opcode_(opcode), next_(next) {
 		args_ = {};
 		blockArgs_ = {};
 		nestedBlocks_ = {};

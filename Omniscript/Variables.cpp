@@ -75,6 +75,10 @@ namespace interp {
 	unsigned int Point::pointId() {
 		return point_id_;
 	}
+
+	void Point::pointId(const int id) {
+		point_id_ = id;
+	}
 	
 	unsigned int Point::typeId() {
 		return type_id_;
@@ -120,7 +124,8 @@ namespace interp {
 	// Variable Functors
 	float readVariable::operator()(const block_ptr &b, Interpreter &interp) {
 		const std::vector<std::shared_ptr<Variable> >::const_iterator var = std::find_if(interp.variables().begin(), interp.variables().end(), findVariable(b->args()[0]));
-		LOG(Log::DEBUGGING, "readVariable: " + std::to_string(round((*var)->value())));
+		LOG(Log::DEBUGGING, "readVariable(" + (*var)->name() + "): " +
+			std::to_string(round((*var)->value())));
 		return round((*var)->value());
 	}
 	
@@ -130,7 +135,8 @@ namespace interp {
 					interp.execute(b->blockArgs()[stoi(b->args()[1].substr(b->args()[1].find(":") + 1))]) :
 					stof(b->args()[1]);
 		(*var)->value(x);
-//		LOG(Log::DEBUGGING, "setVar");
+		LOG(Log::DEBUGGING, "setVar(" + (*var)->name() + "): " +
+			std::to_string(x));
 	}
 	
 	void changeVar::operator()(const block_ptr &b, Interpreter &interp) {
@@ -150,8 +156,9 @@ namespace interp {
 		time_info.tm_isdst = -1;
 		return mktime(&time_info);
 	}
+	
 	void readPnt(Point& p) {
-		const std::string query = "SELECT point.val, point.prevval, point.poll_timestamp, point.cov_timestamp "
+		const std::string query = "SELECT point.pointid, point.val, point.prevval, point.poll_timestamp, point.cov_timestamp "
 								  "FROM point "
 								  "INNER JOIN device "
 								  "ON point.deviceid=device.deviceid "
@@ -160,12 +167,18 @@ namespace interp {
 		try {
 			std::shared_ptr<sql::ResultSet> res = DB_READ(query);
 			if (res->next()) {
-				LOG(Log::DEBUGGING, "readPoint: " +
-					std::to_string(res->getDouble("val")));
-				p.value(res->getDouble("val"));
-				p.prevValue(res->getDouble("prevval"));
-				p.updatePollTimestamp(convertTime(res->getString("poll_timestamp")));
-				p.updateCOV(convertTime(res->getString("cov_timestamp")));
+				if (res->isNull("val")) {
+					LOG(Log::INFO, "readPoint(" + p.name() + ") is NULL");
+					return;
+				} else {
+					LOG(Log::DEBUGGING, "readPoint(" + p.name() + "): " +
+						std::to_string(res->getDouble("val")));
+					p.pointId(res->getInt("pointid"));
+					p.value(res->getDouble("val"));
+					p.prevValue(res->getDouble("prevval"));
+					p.updatePollTimestamp(convertTime(res->getString("poll_timestamp")));
+					p.updateCOV(convertTime(res->getString("cov_timestamp")));
+				}
 			}
 		} catch (sql::SQLException e) {
 			readPnt(p);
@@ -195,7 +208,8 @@ namespace interp {
 				(*point)->incUnwritten();
 			}
 		}
-		LOG(Log::DEBUGGING, "setPoint");
+		LOG(Log::DEBUGGING, "setPoint(" + (*point)->name() + "): " +
+			std::to_string(x));
 	}
 	
 	void changePoint::operator()(const block_ptr &b, Interpreter &interp) {
@@ -221,4 +235,10 @@ namespace interp {
 				 + std::to_string((*p)->pointId()) + "', 0, '"
 				 + std::to_string(x) + "', 0, 180, 0, NOW())");
 	}
+
+	bool operator==(const Point &lhs, const Point &rhs) {
+		return (lhs.name_ == rhs.name_ && lhs.type_id_ == rhs.type_id_ &&
+			lhs.device_ == rhs.device_ && lhs.point_id_ == rhs.point_id_);
+	}
+
 }

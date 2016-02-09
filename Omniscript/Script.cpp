@@ -30,11 +30,8 @@ namespace script {
 	}
 	
 	// Public
-	std::string Script::name(std::string n) {
-		if (!n.empty()) {
-			name_ = n;
-		}
-		return name_;
+	void Script::name(std::string n) {
+		name_ = n;
 	}
 	
 	std::string Script::name() const {

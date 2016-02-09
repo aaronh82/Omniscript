@@ -21,32 +21,43 @@ namespace interp {
 	
 	class Alarm {
 	protected:
-		const std::string key_;
+		const std::string alias_;
 		const std::string level_;
 		const std::string name_;
 		const std::string description_;
+		Point point_;
 		std::time_t date_created_;
 		
 	public:
-		Alarm(const std::string&, const std::string&, const std::string&, const std::string&);
+		Alarm(const std::string&,
+		      const std::string&,
+		      const std::string&,
+		      const std::string&,
+		      const Point&);
 		
-		virtual const std::string& id() { return key_; }
+		virtual const std::string& alias() { return alias_; }
 		virtual const std::string& name() { return name_; }
 		virtual const std::string& description() { return description_; }
 		virtual const std::string& level() { return level_; }
+		const std::string& deviceId() { return std::to_string(point_.deviceId()); }
 		virtual bool write(const std::string&);
 		friend bool operator==(const Alarm&, const Alarm&);
 	};
 	
-	class PointAlarm: public Alarm {
-		Point point_;
-		
-	public:
-		PointAlarm(const std::string&, const std::string&, const std::string&, const std::string&, const Point&);
-		
-		bool write(const std::string&);
-		friend bool operator==(const Alarm&, const Alarm&);
-	};
+//	class PointAlarm: public Alarm {
+//		Point point_;
+//
+//	public:
+//		PointAlarm(const std::string&,
+//		           const std::string&,
+//		           const std::string&,
+//		           const std::string&,
+//		           const Point&);
+//
+//		const std::string& deviceId() { return std::to_string(point_.deviceId()); }
+//		bool write(const std::string&);
+//		friend bool operator==(const PointAlarm&, const PointAlarm&);
+//	};
 	
 	class AlarmHandler final {
 		AlarmHandler();
@@ -61,7 +72,7 @@ namespace interp {
 	public:
 		static AlarmHandler& getHandler();
 		void add(std::shared_ptr<Alarm>);
-		void clear(const std::string&);
+		void clear(const std::string&, const std::string&);
 		void cleanUp();
 	};
 	

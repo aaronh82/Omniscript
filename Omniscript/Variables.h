@@ -24,6 +24,7 @@ using block_ptr = blocks::Block::block_ptr;
 namespace interp {
 	
 	class Variable {
+	protected:
 		std::string name_;
 		std::string type_;
 		float value_;
@@ -56,6 +57,7 @@ namespace interp {
 		Point(const std::string&, const std::string&, float, unsigned int, dev_ptr);
 		
 		unsigned int pointId();
+		void pointId(const int);
 		unsigned int typeId();
 		const dev_ptr device();
 		unsigned int deviceId();
@@ -66,6 +68,7 @@ namespace interp {
 		void resetUnwritten();
 		std::time_t lastPoll();
 		void updatePollTimestamp(std::time_t);
+		friend bool operator==(const Point&, const Point&);
 	};
 	
 	class readVariable: public FloatFunctor {

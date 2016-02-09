@@ -38,9 +38,9 @@ namespace script {
 }
 
 namespace interp {
-	typedef std::shared_ptr<interp::Variable> var_ptr;
-	typedef std::shared_ptr<interp::Point> point_ptr;
-	typedef std::shared_ptr<interp::Device> dev_ptr;
+	typedef std::shared_ptr<Variable> var_ptr;
+	typedef std::shared_ptr<Point> point_ptr;
+	typedef std::shared_ptr<Device> dev_ptr;
 
 	class Interpreter {
 		typedef std::map<std::string, std::shared_ptr<BaseFunctor> > func_map;

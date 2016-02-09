@@ -19,72 +19,163 @@
 #include <ctime>
 
 namespace interp {
-#pragma Alarm Type Definitions
+// Alarm Type Definitions
 	
 	void highLimit::operator()(const block_ptr &b, Interpreter &interp) {
-		const std::string alarmid = "345";
-		const auto limit = (b->args()[1].find("block:") != std::string::npos) ?
-						interp.execute(b->blockArgs()[stoi(b->args()[1].substr(b->args()[1].find(":") + 1))]) :
-						stof(b->args()[1]);
-		const auto i_index = stoi(b->args()[0].substr(b->args()[0].find(":") + 1));
-		const auto input = (b->args()[0].find("block:") != std::string::npos) ?
-						interp.execute(b->blockArgs()[i_index]) :
+		const std::string alias = "omni-high-limit";
+		const auto limit = (b->args()[0].find("block:") != std::string::npos) ?
+						interp.execute(b->blockArgs()[stoi(b->args()[0].substr(b->args()[0].find(":") + 1))]) :
 						stof(b->args()[0]);
+		const auto i_index = stoi(b->args()[1].substr(b->args()[1].find(":") + 1));
+		const auto input = (b->args()[1].find("block:") != std::string::npos) ?
+						interp.execute(b->blockArgs()[i_index]) :
+						stof(b->args()[1]);
 		std::string level = b->args()[2];
+		const auto point = std::find_if(interp.points().begin(),
+		                                interp.points().end(),
+		                                findVariable(b->blockArgs()[i_index]->args()[1]));
 
 		if (input > limit) {
 			const std::string name = "High Limit";
-			const auto point = std::find_if(interp.points().begin(),
-											  interp.points().end(),
-											  findVariable(b->blockArgs()[i_index]->args()[0]));
 			const std::string description = "" + (*point)->name() + "("
-									 + std::to_string(input) + "F) of "
+									 + std::to_string(input) + ") of "
 									 + (*point)->deviceName() +
 									 " is above limit("
-									 + std::to_string(limit) + "F)";
+									 + std::to_string(limit) + ")";
 			AlarmHandler::getHandler().add(
-					std::make_shared<PointAlarm>(alarmid, level, name, description, **point));
+					std::make_shared<Alarm>(alias, level, name, description, **point));
 		} else {
-			AlarmHandler::getHandler().clear(alarmid);
+			AlarmHandler::getHandler().clear(alias, std::to_string((*point)->deviceId()));
 		}
-		LOG(Log::DEBUGGING, "highTempLimit");
+		LOG(Log::DEBUGGING, "highLimit");
+	}
+
+	void highLimitDelay::operator()(const block_ptr &b, Interpreter &interp) {
+		static bool active(false);
+		if (!active) {
+			std::thread t([&] () {
+				const std::string alias = "omni-high-limit-delay";
+				const auto limit = (b->args()[0].find("block:") != std::string::npos) ?
+								   interp.execute(b->blockArgs()[stoi(b->args()[0].substr(b->args()[0].find(":") + 1))]) :
+								   stof(b->args()[0]);
+				const auto i_index = stoi(b->args()[1].substr(b->args()[1].find(":") + 1));
+				const auto input = [&]() -> float { 
+										return (b->args()[1].find("block:") != std::string::npos) ?
+										interp.execute(b->blockArgs()[i_index]) :
+										stof(b->args()[1]);
+								   };
+				const auto delay = (b->args()[2].find("block:") != std::string::npos) ?
+								   interp.execute(b->blockArgs()[i_index]) :
+								   stof(b->args()[2]);
+				std::string level = b->args()[3];
+				const auto point = std::find_if(interp.points().begin(),
+				                                interp.points().end(),
+				                                findVariable(b->blockArgs()[i_index]->args()[1]));
+				const std::time_t start = std::time(nullptr);
+				while (input() > limit) {
+					active = true;
+					if (std::time(nullptr) - start > delay) {
+						const std::string name = "High Limit Delay";
+						const std::string description = "" + (*point)->name() + "("
+														+ std::to_string(input()) + ") of "
+														+ (*point)->deviceName() +
+														" is above limit("
+														+ std::to_string(limit) + ")";
+						AlarmHandler::getHandler().add(
+								std::make_shared<Alarm>(alias, level, name, description, **point));
+						LOG(Log::DEBUGGING, "highLimitDelay");
+					}
+					std::this_thread::sleep_for(std::chrono::milliseconds(200));
+				}
+				
+				AlarmHandler::getHandler().clear(alias, std::to_string((*point)->deviceId()));
+				active = false;
+				return;
+			});
+			t.detach();
+		}
 	}
 	
 	void lowLimit::operator()(const block_ptr &b, Interpreter &interp) {
-		const std::string alarmid = "346";
-		const auto limit = (b->args()[1].find("block:") != std::string::npos) ?
-						interp.execute(b->blockArgs()[stoi(b->args()[1].substr(b->args()[1].find(":") + 1))]) :
-						stof(b->args()[1]);
-		const auto i_index = stoi(b->args()[0].substr(b->args()[0].find(":") + 1));
-		const auto input = (b->args()[0].find("block:") != std::string::npos) ?
-						interp.execute(b->blockArgs()[i_index]) :
+		const std::string alias = "omni-low-limit";
+		const auto limit = (b->args()[0].find("block:") != std::string::npos) ?
+						interp.execute(b->blockArgs()[stoi(b->args()[0].substr(b->args()[0].find(":") + 1))]) :
 						stof(b->args()[0]);
+		const auto i_index = stoi(b->args()[1].substr(b->args()[1].find(":") + 1));
+		const auto input = (b->args()[1].find("block:") != std::string::npos) ?
+						interp.execute(b->blockArgs()[i_index]) :
+						stof(b->args()[1]);
 		const auto level = b->args()[2];
+		const auto point = std::find_if(interp.points().begin(),
+		                                interp.points().end(),
+		                                findVariable(b->blockArgs()[i_index]->args()[1]));
 
 		if (input < limit) {
 			const std::string name = "Low Limit";
-			const auto point = std::find_if(interp.points().begin(),
-											interp.points().end(),
-											findVariable(b->blockArgs()[i_index]->args()[0]));
 			const std::string description = (*point)->name() + "("
-									 + std::to_string(input) + "F) of "
+									 + std::to_string(input) + ") of "
 									 + (*point)->deviceName() +
 									 " is below limit("
-									 + std::to_string(limit) + "F)";
-			AlarmHandler::getHandler().add(
-					std::make_shared<PointAlarm>(alarmid, level, name, description, **point));
+									 + std::to_string(limit) + ")";
+			AlarmHandler::getHandler().add(std::make_shared<Alarm>(alias, level, name, description, **point));
 		} else {
-			AlarmHandler::getHandler().clear(alarmid);
+			AlarmHandler::getHandler().clear(alias, std::to_string((*point)->deviceId()));
 		}
-		LOG(Log::DEBUGGING, "lowTempLimit");
+		LOG(Log::DEBUGGING, "lowLimit");
+	}
+
+	void lowLimitDelay::operator()(const block_ptr &b, Interpreter &interp) {
+		static bool active(false);
+		if (!active) {
+			std::thread t([&]() {
+				const std::string alias = "omni-low-limit-delay";
+				const auto limit = (b->args()[0].find("block:") != std::string::npos) ?
+								   interp.execute(b->blockArgs()[stoi(b->args()[0].substr(b->args()[0].find(":") + 1))]) :
+								   stof(b->args()[0]);
+				const auto i_index = stoi(b->args()[1].substr(b->args()[1].find(":") + 1));
+				const auto input = [&] () -> float {
+										return (b->args()[1].find("block:") != std::string::npos) ?
+										interp.execute(b->blockArgs()[i_index]) :
+										stof(b->args()[1]);
+								   };
+				const auto delay = (b->args()[2].find("block:") != std::string::npos) ?
+								   interp.execute(b->blockArgs()[i_index]) :
+								   stof(b->args()[2]);
+				std::string level = b->args()[3];
+				const auto point = std::find_if(interp.points().begin(),
+				                                interp.points().end(),
+				                                findVariable(b->blockArgs()[i_index]->args()[1]));
+				const std::time_t start = std::time(nullptr);
+				while (input() < limit) {
+					active = true;
+					if (std::time(nullptr) - start > delay) {
+						const std::string name = "Low Limit Delay";
+						const std::string description = "" + (*point)->name() + "("
+														+ std::to_string(input()) + ") of "
+														+ (*point)->deviceName() +
+														" is below limit("
+														+ std::to_string(limit) + ")";
+						AlarmHandler::getHandler().add(
+							std::make_shared<Alarm>(alias, level, name, description, **point));
+						LOG(Log::DEBUGGING, "lowLimitDelay");
+					}
+					std::this_thread::sleep_for(std::chrono::milliseconds(200));
+				}
+				
+				AlarmHandler::getHandler().clear(alias, std::to_string((*point)->deviceId()));
+				active = false;
+				return;
+			});
+			t.detach();
+		}
 	}
 	
 	void runtimeLimit::operator()(const block_ptr &b, Interpreter &interp) {
-		const auto alarmid = "347";
+		const auto alias = "omni-runtime";
 		const auto name = "Runtime Limit";
-		const auto limit = (b->args()[1].find("block:") != std::string::npos) ?
-						interp.execute(b->blockArgs()[stoi(b->args()[1].substr(b->args()[1].find(":") + 1))]) :
-						stof(b->args()[1]);
+		const auto delay = (b->args()[1].find("block:") != std::string::npos) ?
+		                   interp.execute(b->blockArgs()[stoi(b->args()[1].substr(b->args()[1].find(":") + 1))]) :
+		                   stof(b->args()[1]);
 		const auto i_index = stoi(b->args()[0].substr(b->args()[0].find(":") + 1));
 		const auto input = (b->args()[0].find("block:") != std::string::npos) ?
 						interp.execute(b->blockArgs()[i_index]) :
@@ -96,17 +187,19 @@ namespace interp {
 		const auto point = std::find_if(interp.points().begin(),
 						interp.points().end(),
 						findVariable(b->blockArgs()[i_index]->args()[0]));
-		if ((input == onValue) && ((*point)->lastPoll() - (*point)->lastCOV()) > limit) {
+		if ((input == onValue) && ((*point)->lastPoll() - (*point)->lastCOV()) > delay) {
 			const auto description = (*point)->name() +
-				" has been running longer than " +
-				std::to_string(limit) + " seconds.";
+			                         " has been running longer than " +
+			                         std::to_string(delay) + " seconds.";
 			AlarmHandler::getHandler().add(
-				std::make_shared<PointAlarm>(alarmid, level, name, description, **point));
+				std::make_shared<Alarm>(alias, level, name, description, **point));
+		} else {
+			AlarmHandler::getHandler().clear(alias, std::to_string((*point)->deviceId()));
 		}
 	}
 	
 	void statusAlarm::operator()(const block_ptr &b, Interpreter &interp) {
-		const std::string alarmid = "348";
+		const std::string alias = "omni-status";
 		const auto name = "Status Alarm";
 		const auto expected = (b->args()[1].find("block:") != std::string::npos) ?
 			interp.execute(b->blockArgs()[stoi(b->args()[1].substr(b->args()[1].find(":") + 1))]) :
@@ -124,15 +217,18 @@ namespace interp {
 			findVariable(b->blockArgs()[i_index]->args()[0]));
 		if ((input != expected) && ((std::time(nullptr) - (*point)->lastCOV()) > delay)) {
 			const auto description = (*point)->name() +
-				" hasn't changed state in more than " +
-				std::to_string(expected) + " seconds.";
+					" of " + (*point)->deviceName() +
+				" hasn't changed to expected state in more than " +
+				std::to_string(delay) + " seconds.";
 			AlarmHandler::getHandler().add(
-				std::make_shared<PointAlarm>(alarmid, level, name, description, **point));
+				std::make_shared<Alarm>(alias, level, name, description, **point));
+		} else {
+			AlarmHandler::getHandler().clear(alias, std::to_string((*point)->deviceId()));
 		}
 	}
 
 	void staleValueAlarm::operator()(const block_ptr &b, Interpreter &interp) {
-		const std::string alarmid = "349";
+		const std::string alias = "omni-stale-value";
 		const std::string name = "Stale Value Alarm";
 		const auto i_index = stoi(b->args()[0].substr(b->args()[0].find(":") + 1));
 		const auto input = (b->args()[0].find("block:") != std::string::npos) ?
@@ -147,16 +243,19 @@ namespace interp {
 			findVariable(b->blockArgs()[i_index]->args()[0]));
 		if (std::time(nullptr) - (*point)->lastCOV() > delay) {
 			const auto description = "The value(" + std::to_string((*point)->value())
-				+ ") of " + (*point)->name() + " has gone stale for longer than "
+				+ ") of " + (*point)->name() + " of " + (*point)->deviceName() + " has gone stale for longer than "
 				+ std::to_string(delay);
+			AlarmHandler::getHandler().add(std::make_shared<Alarm>(alias, level, name, description, **point));
+		} else {
+			AlarmHandler::getHandler().clear(alias, std::to_string((*point)->deviceId()));
 		}
 	}
 	
 	void customAlarm::operator()(const block_ptr &b, Interpreter &interp) {
-		const std::string alarmid = "350";
-		const std::string name = "Custom Alarm";
-		std::string level = b->args()[0];
-		std::string msg = b->args()[1];
+		const std::string alias = "omni-user-defined";
+		const std::string name = "User-Defined Alarm";
+		std::string msg = b->args()[0];
+		std::string level = b->args()[2];
 		std::vector<block_ptr> ba(b->blockArgs());
 		std::queue<block_ptr, std::deque<block_ptr> >
 			inputs(std::deque<block_ptr>(ba.begin(),
@@ -185,8 +284,12 @@ namespace interp {
 				it = msg.begin() + d;
 			}
 		}
-		AlarmHandler::getHandler().add(std::make_shared<Alarm>(alarmid, level, name, msg));
-		LOG(Log::DEBUGGING, "customAlarm");
+		AlarmHandler::getHandler().add(std::make_shared<Alarm>(alias, level, name, msg));
+		LOG(Log::DEBUGGING, "userDefinedAlarm");
 	}
-	
+
+	void clearCustomAlarm::operator()(const block_ptr &ptr,
+	                                  Interpreter &interpreter) {
+		AlarmHandler::getHandler().clear(alias, std::to_string((*point)->deviceId()));
+	}
 }

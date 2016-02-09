@@ -51,7 +51,7 @@ namespace script {
 	public:
 		Script(std::string, unsigned int, std::string, std::istream*, bool);
 		
-		std::string name(std::string = "");
+		void name(std::string);
 		std::string name() const;
 		unsigned int id();
 		unsigned int id() const;

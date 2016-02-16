@@ -7,6 +7,7 @@
 //
 
 #include "XML_Parser.h"
+#include "DBConnection.h"
 
 #include <sstream>
 #include <string>
@@ -157,8 +158,13 @@ namespace util {
 			for (rapidxml::xml_node<> *device(devices->first_node());
 				 device;
 				 device = device->next_sibling()) {
-				unsigned int id = std::atof(device->first_attribute("device_id")->value());
+//				unsigned int id = std::atof(device->first_attribute("device_id")->value());
 				const std::string name = device->first_attribute("name")->value();
+				unsigned int id;
+				std::shared_ptr<sql::ResultSet> res(DB_READ("SELECT deviceid FROM device WHERE name='" + name + "'"));
+				while (res->next()) {
+					id = res->getUInt("deviceid");
+				}
 				unsigned int path = std::atof(device->first_attribute("path_id")->value());
 				devs.emplace_back(std::make_shared<interp::Device>(name, id, path));
 				const rapidxml::xml_node<> *pointRoot(device->first_node("points"));

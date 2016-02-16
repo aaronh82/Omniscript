@@ -84,7 +84,7 @@ namespace interp {
 		return type_id_;
 	}
 
-	const Point::dev_ptr Point::device() {
+	Point::dev_ptr Point::device() {
 		return device_;
 	}
 	
@@ -158,7 +158,7 @@ namespace interp {
 	}
 	
 	void readPnt(Point& p) {
-		const std::string query = "SELECT point.pointid, point.val, point.prevval, point.poll_timestamp, point.cov_timestamp "
+		const std::string query = "SELECT point.val, point.prevval, point.poll_timestamp, point.cov_timestamp "
 								  "FROM point "
 								  "INNER JOIN device "
 								  "ON point.deviceid=device.deviceid "
@@ -173,7 +173,6 @@ namespace interp {
 				} else {
 					LOG(Log::DEBUGGING, "readPoint(" + p.name() + "): " +
 						std::to_string(res->getDouble("val")));
-					p.pointId(res->getInt("pointid"));
 					p.value(res->getDouble("val"));
 					p.prevValue(res->getDouble("prevval"));
 					p.updatePollTimestamp(convertTime(res->getString("poll_timestamp")));
@@ -224,8 +223,12 @@ namespace interp {
 	
 #pragma mark Helper Functions
 	// Helper functions
-	bool findVariable::operator()(std::shared_ptr<Variable> var) {
+	bool findVariable::operator()(var_ptr var) {
 		return var->name().compare(name_) == 0;
+	}
+
+	bool findPointByID::operator()(point_ptr point) {
+		return point->pointId() == id_;
 	}
 	
 	void writePointValue(const float &x, std::vector<std::shared_ptr<Point> >::const_iterator p) {

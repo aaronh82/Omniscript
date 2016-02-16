@@ -85,6 +85,7 @@ namespace interp {
 	}
 	
 	void Interpreter::start() {
+//		getExistingAlarms();
 		std::map<const int, std::shared_future<float> > threads;
 		for (auto script : program_.startingBlocks()) {
 			if (script.second->opcode().find("when") == 0) {
@@ -159,6 +160,41 @@ namespace interp {
 		}
 		return 0;
 	}
+
+	/*void Interpreter::getExistingAlarms() {
+		const std::string query("SELECT "
+				                        "alarm.alarmid, "
+				                        "alarm.alias, "
+				                        "alarmlevel.name, "
+				                        "alarminstance.name, "
+				                        "alarminstance.description, "
+				                        "alarminstance.pointid, "
+				                        "alarminstance.deviceid "
+								"FROM "
+				                        "alarm "
+								"INNER JOIN "
+				                        "alarminstance "
+								"ON "
+				                        "alarminstance.alarmid=alarm.alarmid "
+								"INNER JOIN "
+				                        "alarmlevel "
+								"ON "
+				                        "alarmlevel.alarmlevelid=alarminstance.devicealarmlevelid "
+								"WHERE alarm.alias LIKE \"omni%\"");
+		std::shared_ptr<sql::ResultSet> res(DB_READ(query));
+		while (res->next()) {
+			auto point_id = res->getInt("alarminstance.pointid");
+			auto device_id = res->getInt("alarminstance.deviceid");
+			Point p = **(std::find_if(points().begin(),
+			                         points().end(),
+			                         findPointByID(res->getInt("alarminstance.pointid"))));
+			std::make_shared<Alarm>(res->getString("alias"),
+			                        res->getString("alarmlevel.name"),
+			                        res->getString("alarminstance.name"),
+			                        res->getString("alarminstance.description"),
+			                        p);
+		}
+	}*/
 	
 	const std::vector<var_ptr>& Interpreter::variables() {
 		return program_.variables();

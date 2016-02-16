@@ -80,7 +80,9 @@ namespace interp {
 	
 	void whenBool::operator()(const block_ptr &b, Interpreter &interp) {
 		bool condition = interp.execute(b->blockArgs()[0]);
-		while (!condition);
+		while (!condition) {
+			sleep(1);
+		}
 		LOG(Log::DEBUGGING, "whenBool");
 	}
 	

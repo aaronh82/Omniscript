@@ -10,12 +10,18 @@
 #define __Omniscript__AlarmHandler__
 
 #include "Variables.h"
+#include "md5.h"
+#include "Interpreter.h"
 
 #include <vector>
 #include <ctime>
 #include <string>
+#include <random>
+#include <functional>
 
 #endif /* defined(__Omniscript__AlarmHandler__) */
+
+using dist_t = std::uniform_real_distribution<>;
 
 namespace interp {
 	
@@ -25,6 +31,8 @@ namespace interp {
 		const std::string level_;
 		const std::string name_;
 		const std::string description_;
+//		std::hash<double> hash_;
+		MD5 hash_;
 		Point point_;
 		std::time_t date_created_;
 		
@@ -34,13 +42,16 @@ namespace interp {
 		      const std::string&,
 		      const std::string&,
 		      const Point&);
-		
-		virtual const std::string& alias() { return alias_; }
-		virtual const std::string& name() { return name_; }
-		virtual const std::string& description() { return description_; }
-		virtual const std::string& level() { return level_; }
-		const std::string& deviceId() { return std::to_string(point_.deviceId()); }
-		virtual bool write(const std::string&);
+
+		const std::string& alias() { return alias_; }
+		const std::string& name() { return name_; }
+		const std::string& description() { return description_; }
+		const std::string& level() { return level_; }
+		const std::string pointId() { return std::to_string(point_.pointId()); }
+		const std::string deviceId() { return std::to_string(point_.device()->id()); }
+		const MD5& getHash() { return hash_; }
+		void setHash(const std::string&);
+		bool write(const std::string&);
 		friend bool operator==(const Alarm&, const Alarm&);
 	};
 	
@@ -65,7 +76,9 @@ namespace interp {
 		AlarmHandler(AlarmHandler&&) = delete;
 		AlarmHandler& operator=(const AlarmHandler&) = delete;
 		AlarmHandler& operator=(AlarmHandler&&) = delete;
-		
+
+		std::mt19937 mt;
+		dist_t dist;
 		std::vector<std::shared_ptr<Alarm> > alarm_queue;
 		bool alarmExists(const Alarm&);
 		

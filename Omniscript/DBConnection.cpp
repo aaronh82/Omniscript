@@ -100,7 +100,8 @@ namespace conn {
 			res = execute(query);
 			std::this_thread::sleep_for(std::chrono::milliseconds(200));
 		} catch (sql::SQLException e) {
-			LOG(Log::WARN, "Database read failed: " + std::string(e.what()));
+			LOG(Log::WARN, "Database read failed: " + std::string(e.what()) +
+				" (" + query + ")");
 			if (e.getErrorCode() == 2006 && conn_->isClosed()) {
                  	       connect();
 			}

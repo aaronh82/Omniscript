@@ -13,6 +13,7 @@
 #include "Block.h"
 #include "BaseFunctor.h"
 #include "Device.h"
+//#include "Interpreter.h"
 
 #include <memory>
 #include <vector>
@@ -59,7 +60,7 @@ namespace interp {
 		unsigned int pointId();
 		void pointId(const int);
 		unsigned int typeId();
-		const dev_ptr device();
+		dev_ptr device();
 		unsigned int deviceId();
 		std::string deviceName();
 		unsigned int pathId();
@@ -112,6 +113,13 @@ namespace interp {
 	public:
 		findVariable(const std::string& name): name_(name) {}
 		bool operator()(std::shared_ptr<Variable>);
+	};
+
+	class findPointByID {
+		int id_;
+	public:
+		findPointByID(const int& id): id_(id) {}
+		bool operator()(std::shared_ptr<Point>);
 	};
 	
 	void writePointValue(const float&, std::vector<std::shared_ptr<Point> >::const_iterator);

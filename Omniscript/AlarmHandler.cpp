@@ -8,10 +8,7 @@
 
 #include "AlarmHandler.h"
 #include "DBConnection.h"
-
-#include <functional>
-#include <algorithm>
-#include <typeinfo>
+#include "Interpreter.h"
 
 namespace interp {
 	bool execAlarm(const std::string& cmd) {
@@ -35,8 +32,40 @@ namespace interp {
 //		return false;
 	}
 	
-	AlarmHandler::AlarmHandler() {
-		
+	AlarmHandler::AlarmHandler(): dist(0.0, std::numeric_limits<double>::max()) {
+		std::random_device rd;
+		mt.seed(rd());
+
+		// TODO: Gather any existing alarms from the database to avoid repeat instances
+		/*const std::string query("SELECT "
+				                        "alarm.alarmid, "
+				                        "alarm.alias, "
+				                        "alarmlevel.name, "
+										"alarminstance.name, "
+				                        "alarminstance.description, "
+				                        "alarminstance.pointid, "
+				                        "alarminstance.deviceid "
+								"FROM "
+				                        "alarm "
+								"INNER JOIN "
+				                        "alarminstance "
+								"ON "
+				                        "alarminstance.alarmid=alarm.alarmid "
+								"INNER JOIN "
+										"alarmlevel "
+								"ON "
+				                        "alarmlevel.alarmlevelid=alarminstance.devicealarmlevelid "
+								"WHERE alarm.alias LIKE \"omni%\"");
+		std::shared_ptr<sql::ResultSet> res(DB_READ(query));
+		while (res->next()) {
+			auto point_id = res->getInt("alarminstance.pointid");
+			auto device_id = res->getInt("alarminstance.deviceid");
+			std::make_shared<Alarm>(res->getString("alias"),
+			                        res->getString("alarmlevel.name"),
+			                        res->getString("alarminstance.name"),
+			                        res->getString("alarminstance.description"),
+			                        );
+		}*/
 	}
 	
 	bool AlarmHandler::alarmExists(const Alarm &alarm) {
@@ -52,6 +81,8 @@ namespace interp {
 	}
 	
 	void AlarmHandler::add(std::shared_ptr<Alarm> alarm) {
+//		auto alarm = std::make_shared<Alarm>(alias, level, name, description, point);
+		alarm->setHash(std::to_string(dist(mt)));
 		const std::string cmd = "/usr/bin/php -f "
 								"/var/www/maverick/app/public_htdocs/api.php "
 								"target=alarm action=set "
@@ -59,28 +90,37 @@ namespace interp {
 								"deviceid=" + alarm->deviceId() + " "
 								"level=\"" + alarm->level() + "\" "
 								"name=\"" + alarm->name() + "\" "
-								"text=\"" + alarm->description() + "\"";
-		cleanUp();
+								"description=\"" + alarm->description() + "\" "
+								"token=\"" + alarm->getHash().hexdigest() + "\"";
+//		cleanUp();
 		if (!alarmExists(*alarm) && alarm->write(cmd)) {
 			alarm_queue.push_back(alarm);
 		}
 	}
 	
 	void AlarmHandler::clear(const std::string &alias, const std::string &deviceId) {
-		const std::string cmd = "/usr/bin/php -f "
-								"/var/www/maverick/app/public_htdocs/api.php "
-								"target=alarm action=clear "
-								"alias=" + alias + " "
-								"deviceid=" + deviceId;
-		execAlarm(cmd);
+		auto alarm_it = std::find_if(alarm_queue.begin(), alarm_queue.end(),
+		             [&] (std::shared_ptr<Alarm> alarm) ->bool {
+			             return (alarm->alias() == alias) && (alarm->deviceId() == deviceId);
+		});
+		if (alarm_it != alarm_queue.end()) {
+			const std::string cmd = "/usr/bin/php -f "
+					                        "/var/www/maverick/app/public_htdocs/api.php "
+					                        "target=alarm action=clear "
+					                        "token=" +
+			                        (*alarm_it)->getHash().hexdigest();
+			//								"alias=" + alias + " "
+			//								"deviceid=" + deviceId;
+			execAlarm(cmd);
+		}
 	}
 	
 	void AlarmHandler::cleanUp() {
 		for (auto alarm = alarm_queue.begin(); alarm != alarm_queue.end(); ++alarm) {
 			const std::string query = "SELECT * FROM alarminstance "
-									  "WHERE alarmkey=" + (*alarm)->alias() + " " +
-			                          "AND description=\"" +
-			                          (*alarm)->description() + "\"";
+									  "WHERE name=" + (*alarm)->name() + " "
+			                          "AND deviceid=" + (*alarm)->deviceId() + " "
+									  "AND pointid=" + (*alarm)->pointId();
 			std::shared_ptr<sql::ResultSet> res(DB_READ(query));
 			if (res->rowsCount() != 0) {
 				alarm_queue.erase(alarm);
@@ -88,7 +128,7 @@ namespace interp {
 		}
 	}
 	
-#pragma Alarm Class Definitions
+#pragma mark Alarm Class Definitions
 	
 	Alarm::Alarm(const std::string &alias,
 				 const std::string &level,
@@ -104,6 +144,12 @@ namespace interp {
 		std::time(&date_created_);
 //		std::hash<std::string> str_hash;
 //		alias_ = str_hash(name) + date_created_;
+	}
+
+	void Alarm::setHash(const std::string& rn) {
+		hash_.update(rn.c_str(), rn.size());
+		hash_.finalize();
+		LOG(Log::LogLevel::DEBUGGING, "Alarm hash: " + hash_.hexdigest());
 	}
 	
 	bool Alarm::write(const std::string &cmd) {
@@ -124,11 +170,13 @@ namespace interp {
 	
 	bool operator==(const Alarm &lhs, const Alarm &rhs) {
 		return (lhs.alias_ == rhs.alias_ && lhs.level_ == rhs.level_ &&
-			lhs.name_ == rhs.name_); // && lhs.description_ == rhs.description_);
+		        lhs.name_ == rhs.name_); // &&
+//		        lhs.hash_.hexdigest() == rhs.hash_.hexdigest());
 	}
 
 //	bool operator==(const PointAlarm &lhs, const PointAlarm &rhs) {
 //		return (lhs.alias_ == rhs.alias_ && lhs.level_ == rhs.level_ &&
 //			lhs.name_ == rhs.name_ && lhs.point_ == rhs.point_);
 //	}
+
 }

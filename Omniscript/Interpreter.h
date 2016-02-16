@@ -49,7 +49,8 @@ namespace interp {
 		
 		void initPrims();
 		float callFunc(const func_map::const_iterator&, const block_ptr&);
-		
+		void getExistingAlarms();
+
 	public:
 		Interpreter(script::Script&);
 		

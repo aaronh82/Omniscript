@@ -31,9 +31,10 @@ namespace interp {
 		const std::string level_;
 		const std::string name_;
 		const std::string description_;
-//		std::hash<double> hash_;
+		const unsigned int point_id_;
+		const unsigned int device_id_;
 		MD5 hash_;
-		Point point_;
+		std::string token_;
 		std::time_t date_created_;
 		
 	public:
@@ -41,16 +42,19 @@ namespace interp {
 		      const std::string&,
 		      const std::string&,
 		      const std::string&,
-		      const Point&);
+		      const unsigned int,
+		      const unsigned int);
 
 		const std::string& alias() { return alias_; }
 		const std::string& name() { return name_; }
 		const std::string& description() { return description_; }
 		const std::string& level() { return level_; }
-		const std::string pointId() { return std::to_string(point_.pointId()); }
-		const std::string deviceId() { return std::to_string(point_.device()->id()); }
+		const std::string pointId() { return std::to_string(point_id_); }
+		const std::string deviceId() { return std::to_string(device_id_); }
 		const MD5& getHash() { return hash_; }
-		void setHash(const std::string&);
+		void createHash(const std::string&);
+		const std::string& getToken() { return token_; }
+		void setToken(const std::string &);
 		bool write(const std::string&);
 		friend bool operator==(const Alarm&, const Alarm&);
 	};
@@ -85,7 +89,10 @@ namespace interp {
 	public:
 		static AlarmHandler& getHandler();
 		void add(std::shared_ptr<Alarm>);
-		void clear(const std::string&, const std::string&);
+		void clear(const std::string&,
+		           const std::string&,
+		           const std::string&,
+		           const std::string&);
 		void cleanUp();
 	};
 	

@@ -30,6 +30,7 @@
 #include "Logger.h"
 #include "DBConnection.h"
 #include "Device.h"
+#include "ThreadPool.h"
 
 using block_ptr = blocks::Block::block_ptr;
 
@@ -46,6 +47,7 @@ namespace interp {
 		typedef std::map<std::string, std::shared_ptr<BaseFunctor> > func_map;
 		func_map primTable;
 		script::Script& program_;
+		ThreadPool pool;
 		
 		void initPrims();
 		float callFunc(const func_map::const_iterator&, const block_ptr&);

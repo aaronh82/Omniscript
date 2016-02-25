@@ -37,14 +37,15 @@ namespace interp {
 		mt.seed(rd());
 
 		// TODO: Gather any existing alarms from the database to avoid repeat instances
-		/*const std::string query("SELECT "
+		const std::string query("SELECT "
 				                        "alarm.alarmid, "
-				                        "alarm.alias, "
-				                        "alarmlevel.name, "
-										"alarminstance.name, "
-				                        "alarminstance.description, "
-				                        "alarminstance.pointid, "
-				                        "alarminstance.deviceid "
+				                        "alarm.alias AS 'alias', "
+				                        "alarmlevel.name AS 'level', "
+										"alarminstance.name AS 'name', "
+				                        "alarminstance.description AS 'description', "
+				                        "alarminstance.pointid AS 'pointid', "
+				                        "alarminstance.deviceid AS 'deviceid', "
+				                        "alarminstance.token AS 'token' "
 								"FROM "
 				                        "alarm "
 								"INNER JOIN "
@@ -58,14 +59,15 @@ namespace interp {
 								"WHERE alarm.alias LIKE \"omni%\"");
 		std::shared_ptr<sql::ResultSet> res(DB_READ(query));
 		while (res->next()) {
-			auto point_id = res->getInt("alarminstance.pointid");
-			auto device_id = res->getInt("alarminstance.deviceid");
-			std::make_shared<Alarm>(res->getString("alias"),
-			                        res->getString("alarmlevel.name"),
-			                        res->getString("alarminstance.name"),
-			                        res->getString("alarminstance.description"),
-			                        );
-		}*/
+			auto alarm = std::make_shared<Alarm>(res->getString("alias"),
+			                        res->getString("level"),
+			                        res->getString("name"),
+			                        res->getString("description"),
+			                        res->getUInt("pointid"),
+			                        res->getUInt("deviceid"));
+			alarm->setToken(res->getString("token"));
+			alarm_queue.push_back(alarm);
+		}
 	}
 	
 	bool AlarmHandler::alarmExists(const Alarm &alarm) {
@@ -82,12 +84,13 @@ namespace interp {
 	
 	void AlarmHandler::add(std::shared_ptr<Alarm> alarm) {
 //		auto alarm = std::make_shared<Alarm>(alias, level, name, description, point);
-		alarm->setHash(std::to_string(dist(mt)));
+		alarm->createHash(std::to_string(dist(mt)));
 		const std::string cmd = "/usr/bin/php -f "
 								"/var/www/maverick/app/public_htdocs/api.php "
 								"target=alarm action=set "
 								"alias=" + alarm->alias() + " "
 								"deviceid=" + alarm->deviceId() + " "
+								"pointid=" + alarm->pointId() + " "
 								"level=\"" + alarm->level() + "\" "
 								"name=\"" + alarm->name() + "\" "
 								"description=\"" + alarm->description() + "\" "
@@ -98,20 +101,24 @@ namespace interp {
 		}
 	}
 	
-	void AlarmHandler::clear(const std::string &alias, const std::string &deviceId) {
+	void AlarmHandler::clear(const std::string &alias,
+	                         const std::string &device_id,
+	                         const std::string &point_id,
+	                         const std::string &level) {
 		auto alarm_it = std::find_if(alarm_queue.begin(), alarm_queue.end(),
 		             [&] (std::shared_ptr<Alarm> alarm) ->bool {
-			             return (alarm->alias() == alias) && (alarm->deviceId() == deviceId);
+			             return (alarm->alias() == alias) &&
+					             (alarm->deviceId() == device_id) &&
+					             (alarm->pointId() == point_id) &&
+					             (alarm->level() == level);
 		});
 		if (alarm_it != alarm_queue.end()) {
 			const std::string cmd = "/usr/bin/php -f "
 					                        "/var/www/maverick/app/public_htdocs/api.php "
 					                        "target=alarm action=clear "
-					                        "token=" +
-			                        (*alarm_it)->getHash().hexdigest();
-			//								"alias=" + alias + " "
-			//								"deviceid=" + deviceId;
+					                        "token=" + (*alarm_it)->getToken();
 			execAlarm(cmd);
+			alarm_queue.erase(alarm_it);
 		}
 	}
 	
@@ -134,22 +141,29 @@ namespace interp {
 				 const std::string &level,
 				 const std::string &name,
 				 const std::string &description,
-				 const Point &point):
+				 const unsigned int point_id,
+				 const unsigned int device_id):
 	alias_(alias),
 	level_(level),
 	name_(name),
 	description_(description),
-	point_(point)
+	point_id_(point_id),
+	device_id_(device_id)
 	{
 		std::time(&date_created_);
 //		std::hash<std::string> str_hash;
 //		alias_ = str_hash(name) + date_created_;
 	}
 
-	void Alarm::setHash(const std::string& rn) {
+	void Alarm::createHash(const std::string &rn) {
 		hash_.update(rn.c_str(), rn.size());
 		hash_.finalize();
+		token_ = hash_.hexdigest();
 		LOG(Log::LogLevel::DEBUGGING, "Alarm hash: " + hash_.hexdigest());
+	}
+
+	void Alarm::setToken(const std::string &token) {
+		token_ = token;
 	}
 	
 	bool Alarm::write(const std::string &cmd) {

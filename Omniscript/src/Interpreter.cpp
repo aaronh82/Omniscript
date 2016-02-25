@@ -13,8 +13,9 @@
 
 namespace interp {
 	
-	Interpreter::Interpreter(script::Script &prog): program_(prog) {
-			initPrims();
+	Interpreter::Interpreter(script::Script &prog): program_(prog),
+	                                                pool(prog.startingBlocks().size()) {
+		initPrims();
 	}
 	
 	void Interpreter::initPrims() {
@@ -85,29 +86,34 @@ namespace interp {
 	}
 	
 	void Interpreter::start() {
-//		getExistingAlarms();
-		std::map<const int, std::shared_future<float> > threads;
+//		std::map<const int, std::shared_future<float> > threads;
 		for (auto script : program_.startingBlocks()) {
 			if (script.second->opcode().find("when") == 0) {
-				std::shared_future<float> f(std::async(std::launch::async,
-											&Interpreter::execute, *this, script.second));
-				if (f.valid())
-					threads.insert({script.first, f});
+				try {
+					pool.enqueue(&Interpreter::execute, &(*this), script.second);
+				} catch (std::runtime_error e) {
+					LOG(Log::ERROR, e.what());
+				}
+//				std::shared_future<float> f(std::async(std::launch::async,
+//											&Interpreter::execute, *this, script.second));
+//				if (f.valid())
+//					threads.insert({script.first, f});
 			} else {
 				LOG(Log::ERROR, "A script failed to start: " + script.second->opcode());
 			}
 		}
 		
 		while (!program_.needsRestart()) {
-			for (auto &thread : threads) {
-				if ((thread.second).wait_for(std::chrono::milliseconds(0))
-					== std::future_status::ready) {
-					const int idx(thread.first);
-					thread.second = std::shared_future<float>(std::async(std::launch::async, &Interpreter::execute, *this, program_.startingBlocks()[idx]));
-				}
-				
-			}
-			
+//			for (auto &thread : threads) {
+//				if ((thread.second).wait_for(std::chrono::milliseconds(0))
+//					== std::future_status::ready) {
+//					const int idx(thread.first);
+//					thread.second = std::shared_future<float>(std::async(std::launch::async, &Interpreter::execute, *this, program_.startingBlocks()[idx]));
+//				}
+//
+//			}
+
+//			TODO: Break out into its own function
 			for (auto& device: program_.devices()) {
 				std::shared_ptr<sql::ResultSet> res =
 				DB_READ("SELECT devicestatus.name "
@@ -160,41 +166,6 @@ namespace interp {
 		}
 		return 0;
 	}
-
-	/*void Interpreter::getExistingAlarms() {
-		const std::string query("SELECT "
-				                        "alarm.alarmid, "
-				                        "alarm.alias, "
-				                        "alarmlevel.name, "
-				                        "alarminstance.name, "
-				                        "alarminstance.description, "
-				                        "alarminstance.pointid, "
-				                        "alarminstance.deviceid "
-								"FROM "
-				                        "alarm "
-								"INNER JOIN "
-				                        "alarminstance "
-								"ON "
-				                        "alarminstance.alarmid=alarm.alarmid "
-								"INNER JOIN "
-				                        "alarmlevel "
-								"ON "
-				                        "alarmlevel.alarmlevelid=alarminstance.devicealarmlevelid "
-								"WHERE alarm.alias LIKE \"omni%\"");
-		std::shared_ptr<sql::ResultSet> res(DB_READ(query));
-		while (res->next()) {
-			auto point_id = res->getInt("alarminstance.pointid");
-			auto device_id = res->getInt("alarminstance.deviceid");
-			Point p = **(std::find_if(points().begin(),
-			                         points().end(),
-			                         findPointByID(res->getInt("alarminstance.pointid"))));
-			std::make_shared<Alarm>(res->getString("alias"),
-			                        res->getString("alarmlevel.name"),
-			                        res->getString("alarminstance.name"),
-			                        res->getString("alarminstance.description"),
-			                        p);
-		}
-	}*/
 	
 	const std::vector<var_ptr>& Interpreter::variables() {
 		return program_.variables();

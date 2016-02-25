@@ -43,9 +43,12 @@ namespace interp {
 									 + std::to_string(limit) + ")";
 			AlarmHandler::getHandler().add(
 					std::make_shared<Alarm>(alias, level, name, description,
-					                        **point));
+					                        (*point)->pointId(), (*point)->device()->id()));
 		} else {
-			AlarmHandler::getHandler().clear(alias, std::to_string((*point)->device()->id()));
+			AlarmHandler::getHandler().clear(alias,
+			                                 std::to_string((*point)->device()->id()),
+			                                 std::to_string((*point)->pointId()),
+			                                 level);
 		}
 		LOG(Log::DEBUGGING, "highLimit");
 	}
@@ -83,13 +86,18 @@ namespace interp {
 														+ std::to_string(limit) + ")";
 						AlarmHandler::getHandler().add(
 								std::make_shared<Alarm>(alias, level, name,
-								                        description, **point));
+								                        description,
+								                        (*point)->pointId(),
+								                        (*point)->device()->id()));
 						LOG(Log::DEBUGGING, "highLimitDelay");
 					}
 					std::this_thread::sleep_for(std::chrono::milliseconds(200));
 				}
 				
-				AlarmHandler::getHandler().clear(alias, std::to_string((*point)->device()->id()));
+				AlarmHandler::getHandler().clear(alias,
+				                                 std::to_string((*point)->device()->id()),
+				                                 std::to_string((*point)->pointId()),
+				                                 level);
 				active = false;
 				return;
 			});
@@ -120,9 +128,12 @@ namespace interp {
 									 + std::to_string(limit) + ")";
 			AlarmHandler::getHandler().add(
 					std::make_shared<Alarm>(alias, level, name, description,
-					                        **point));
+					                        (*point)->pointId(), (*point)->device()->id()));
 		} else {
-			AlarmHandler::getHandler().clear(alias, std::to_string((*point)->device()->id()));
+			AlarmHandler::getHandler().clear(alias,
+			                                 std::to_string((*point)->device()->id()),
+			                                 std::to_string((*point)->pointId()),
+			                                 level);
 		}
 		LOG(Log::DEBUGGING, "lowLimit");
 	}
@@ -160,13 +171,18 @@ namespace interp {
 														+ std::to_string(limit) + ")";
 						AlarmHandler::getHandler().add(
 								std::make_shared<Alarm>(alias, level, name,
-								                        description, **point));
+								                        description,
+								                        (*point)->pointId(),
+								                        (*point)->device()->id()));
 						LOG(Log::DEBUGGING, "lowLimitDelay");
 					}
 					std::this_thread::sleep_for(std::chrono::milliseconds(200));
 				}
 				
-				AlarmHandler::getHandler().clear(alias, std::to_string((*point)->device()->id()));
+				AlarmHandler::getHandler().clear(alias,
+				                                 std::to_string((*point)->device()->id()),
+				                                 std::to_string((*point)->pointId()),
+				                                 level);
 				active = false;
 				return;
 			});
@@ -197,9 +213,12 @@ namespace interp {
 			                         std::to_string(delay) + " seconds.";
 			AlarmHandler::getHandler().add(
 					std::make_shared<Alarm>(alias, level, name, description,
-					                        **point));
+					                        (*point)->pointId(), (*point)->device()->id()));
 		} else {
-			AlarmHandler::getHandler().clear(alias, std::to_string((*point)->device()->id()));
+			AlarmHandler::getHandler().clear(alias,
+			                                 std::to_string((*point)->device()->id()),
+			                                 std::to_string((*point)->pointId()),
+			                                 level);
 		}
 	}
 	
@@ -227,9 +246,13 @@ namespace interp {
 				std::to_string(delay) + " seconds.";
 			AlarmHandler::getHandler().add(
 					std::make_shared<Alarm>(alias, level, name, description,
-					                        **point));
+					                        (*point)->pointId(),
+					                        (*point)->device()->id()));
 		} else {
-			AlarmHandler::getHandler().clear(alias, std::to_string((*point)->device()->id()));
+			AlarmHandler::getHandler().clear(alias,
+			                                 std::to_string((*point)->device()->id()),
+			                                 std::to_string((*point)->pointId()),
+			                                 level);
 		}
 	}
 
@@ -253,9 +276,12 @@ namespace interp {
 				+ std::to_string(delay);
 			AlarmHandler::getHandler().add(
 					std::make_shared<Alarm>(alias, level, name, description,
-					                        **point));
+					                        (*point)->pointId(), (*point)->device()->id()));
 		} else {
-			AlarmHandler::getHandler().clear(alias, std::to_string((*point)->device()->id()));
+			AlarmHandler::getHandler().clear(alias,
+			                                 std::to_string((*point)->device()->id()),
+			                                 std::to_string((*point)->pointId()),
+			                                 level);
 		}
 	}
 	
